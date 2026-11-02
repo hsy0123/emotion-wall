@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "emotions": {
+    "joy":      {"label_ko": "기쁨",        "colors": ["#FFD23F", "#FF9F43"], "white": 0.15},
+    "love":     {"label_ko": "사랑/따뜻함", "colors": ["#FF7EB6", "#FFB3C6"], "white": 0.20},
+    "surprise": {"label_ko": "놀람",        "colors": ["#2EC4B6", "#F15BB5"], "white": 0.10},
+    "sadness":  {"label_ko": "슬픔",        "colors": ["#3A5CBE", "#6050AA"], "white": 0.00},
+    "anger":    {"label_ko": "분노",        "colors": ["#E63946", "#9D0208"], "white": 0.00},
+    "fear":     {"label_ko": "두려움/불안", "colors": ["#5E3C99", "#1B1F4B"], "white": 0.00},
+    "neutral":  {"label_ko": "평온/중립",   "colors": ["#FFE9C7", "#FFF4E0"], "white": 0.70}
+  },
+  "mapper": {
+    "top_k": 3,
+    "threshold": 0.15,
+    "intensity_floor": 0.4,
+    "ema_alpha": 0.6
+  },
+  "tuning": {
+    "lightness": 1.0,
+    "saturation": 1.0
+  },
+  "grid": {
+    "rows": 3,
+    "cols": 4,
+    "angle": 45,
+    "serpentine": false
+  }
+}
