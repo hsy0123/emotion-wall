@@ -315,8 +315,8 @@ button.addEventListener('click', async () => {
     // Match the physical layout: top/middle dominant color; bottom ranked palette.
     ballGrid.style.gridTemplateColumns = 'repeat(4, minmax(0, 1fr))'
     ballGrid.innerHTML = Array.from({ length: 12 }, (_, index) => `
-      <div class="emotion-ball" role="img"
-        aria-label="${['맨 위', '가운데', '맨 아래'][Math.floor(index / 4)]} 줄 감정색 말랑이 ${index % 4 + 1}"></div>
+      <button type="button" class="emotion-ball"
+        aria-label="${['맨 위', '가운데', '맨 아래'][Math.floor(index / 4)]} 줄 감정색 말랑이 ${index % 4 + 1} 눌러보기"></button>
     `).join('')
     ballElements = [...ballGrid.children]
     ledView.update(data)
@@ -354,4 +354,17 @@ button.addEventListener('click', async () => {
     button.textContent = '감정 분석하기'
     button.removeAttribute('aria-busy')
   }
+})
+
+// Tactile feedback only: no color details, selection or LED commands.
+ballGrid.addEventListener('click', event => {
+  const ball = event.target.closest('.emotion-ball')
+  if (!ball || !ballGrid.contains(ball)) return
+  ball.classList.remove('squish')
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  void ball.offsetWidth
+  ball.classList.add('squish')
+})
+ballGrid.addEventListener('animationend', event => {
+  if (event.animationName === 'ball-squish') event.target.classList.remove('squish')
 })

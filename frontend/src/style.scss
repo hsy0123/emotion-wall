@@ -258,7 +258,9 @@ button, textarea { font: inherit; }
   padding: 0;
   border: 1px solid rgba(255,255,255,.5);
   border-radius: 50%;
-  cursor: default;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   -webkit-appearance: none;
   appearance: none;
 
@@ -372,3 +374,18 @@ button, textarea { font: inherit; }
 .preview-toggle:focus-visible { outline: 3px solid #23838f; outline-offset: 3px; }
 
 .ball-caption { margin: -14px 0 22px; color: #55767b; font-size: 12px; line-height: 1.7; }
+
+.emotion-ball {
+  transform-origin: center 65%;
+  &.squish { animation: ball-squish .55s ease-out; }
+  &:focus-visible { outline: 2px solid #23838f; outline-offset: 4px; }
+}
+@keyframes ball-squish {
+  0%, 100% { transform: scale(1); }
+  22% { transform: scale(1.12, .84); }
+  46% { transform: scale(.93, 1.08); }
+  70% { transform: scale(1.04, .97); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .emotion-ball.squish { animation: none; }
+}
