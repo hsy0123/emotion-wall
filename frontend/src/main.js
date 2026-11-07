@@ -1,5 +1,6 @@
 
 import './style.scss'
+import brandLogo from './assets/emotion-wall-logo.png'
 import { createLedView } from './led-view.js'
 
 // 백엔드 주소: 배포 시 VITE_API_URL 환경변수로 지정 (없으면 로컬 서버 사용)
@@ -30,7 +31,7 @@ document.querySelector('#app').innerHTML = `
     <!-- 헤더 -->
     <header class="app-header">
       <div class="brand">
-        <span class="brand-icon">✿</span>
+        <img class="brand-icon" src="${brandLogo}" alt="" width="36" height="36" aria-hidden="true">
         <strong>Emotion Wall</strong>
       </div>
       <span class="menu-icon" aria-hidden="true">☰</span>

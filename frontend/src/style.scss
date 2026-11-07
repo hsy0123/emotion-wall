@@ -45,7 +45,7 @@ button, textarea { font: inherit; }
     gap: 10px;
     font-size: 17px;
   }
-  .brand-icon { color: #a78bfa; font-size: 30px; }
+  .brand-icon { display: block; width: 36px; height: 36px; flex-shrink: 0; object-fit: contain; }
   .menu-icon { color: #49415c; font-size: 20px; }
 }
 
