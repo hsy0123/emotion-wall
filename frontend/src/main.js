@@ -101,15 +101,6 @@ document.querySelector('#app').innerHTML = `
         aria-label="감정별 색상이 적용된 말랑이 12개"
       ></div>
 
-      <div
-  id="ballInfo"
-  class="ball-info"
-  role="status"
-  aria-live="polite"
->
-  말랑이를 터치하면 색상 정보를 볼 수 있어요.
-</div>
-
       <section id="ledSection" class="led-section" hidden aria-label="LED 전송 결과와 효과 미리보기"></section>
 
 
@@ -328,24 +319,20 @@ button.addEventListener('click', async () => {
     // 다를 수 있으므로 위치를 명시적으로 지정
     
     ballGrid.innerHTML = data.leds
-      .map((led, index) => {
+      .map((led) => {
         const [r, g, b] = led.rgb
 
         return `
-          <button
-            type="button"
+          <div
             class="emotion-ball"
+            role="img"
             style="
               --ball-rgb: ${r}, ${g}, ${b};
-              --ball-delay: ${index * 70}ms;
               grid-row: ${led.row + 1};
               grid-column: ${led.col + 1};
             "
-            data-index="${led.index}"
-            data-rgb="${r}, ${g}, ${b}"
-            aria-label="감정 말랑이 ${led.index + 1}, RGB ${r}, ${g}, ${b}"
-            aria-pressed="false"
-          ></button>
+            aria-label="감정색 말랑이 ${led.index + 1}"
+          ></div>
         `
       })
       .join('')
@@ -383,46 +370,4 @@ button.addEventListener('click', async () => {
     button.textContent = '감정 분석하기'
     button.removeAttribute('aria-busy')
   }
-})
-
-/* =====================================
-   STEP 8: 말랑이 터치 이벤트
-===================================== */
-
-
-const ballInfo = document.querySelector('#ballInfo')
-
-ballGrid.addEventListener('click', (event) => {
-  const ball = event.target.closest('.emotion-ball')
-  if (!ball || !ballGrid.contains(ball)) return
-
-  // 말랑이 클릭 애니메이션
-  ball.classList.remove('squish')
-  void ball.offsetWidth
-  ball.classList.add('squish')
-
-  // 선택 상태 변경
-  ballGrid.querySelectorAll('.emotion-ball').forEach(item => {
-    item.classList.remove('selected')
-    item.setAttribute('aria-pressed', 'false')
-  })
-
-  ball.classList.add('selected')
-  ball.setAttribute('aria-pressed', 'true')
-
-  // RGB 정보 표시
-  const index = Number(ball.dataset.index) + 1
-  const rgb = ball.dataset.rgb
-  const values = rgb.split(',').map(Number)
-    .map(v => Math.max(0, Math.min(255, v)))
-    .join(', ')
-
-  ballInfo.innerHTML = `
-    <div class="ball-info-title">말랑이 ${index}</div>
-    <div class="ball-info-color">
-      <span class="ball-color-chip"
-            style="background: rgb(${values})"></span>
-      <span>RGB (${values})</span>
-    </div>
-  `
 })

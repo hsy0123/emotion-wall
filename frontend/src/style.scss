@@ -256,7 +256,7 @@ button, textarea { font: inherit; }
   padding: 0;
   border: 1px solid rgba(255,255,255,.5);
   border-radius: 50%;
-  cursor: pointer;
+  cursor: default;
   -webkit-appearance: none;
   appearance: none;
 
@@ -295,31 +295,6 @@ button, textarea { font: inherit; }
     pointer-events: none;
   }
 
-  &:hover { filter: brightness(1.08); }
-
-  &.selected {
-    box-shadow:
-      inset 0 3px 10px rgba(255,255,255,.48),
-      0 0 0 3px rgba(89,190,201,.24),
-      0 0 35px rgba(var(--ball-rgb),.32);
-  }
-
-  &.squish {
-  animation: jelly-squish .45s ease-out;
-}
-}
-
-.ball-info {
-  margin-top: 0;
-  padding: 20px 18px;
-  border: 1px solid rgba(89,190,201,.24);
-  border-radius: 20px;
-  background: linear-gradient(135deg,#eff9fa,#fbfefe);
-  color: #486d73;
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.7;
-  box-shadow: 0 5px 20px rgba(35,120,130,.05);
 }
 
 .loading-spinner {
@@ -331,13 +306,6 @@ button, textarea { font: inherit; }
   animation: spin .8s linear infinite;
 }
 
-
-@keyframes jelly-squish {
-  0%, 100% { transform: scale(1); }
-  30% { transform: scale(1.09, 0.93); }
-  60% { transform: scale(0.97, 1.04); }
-  80% { transform: scale(1.02, 0.99); }
-}
 
 @keyframes appear {
   from { opacity: 0; transform: translateY(24px); }
@@ -361,7 +329,6 @@ button, textarea { font: inherit; }
   }
   .emotion-name { font-size: 12px; }
   .ball-grid { gap: 10px !important; margin-bottom: 34px; }
-  .ball-info { padding: 18px 14px; font-size: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
