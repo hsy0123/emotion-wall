@@ -14,7 +14,7 @@ export const LABELS = { joy: '기쁨', love: '사랑', surprise: '놀람', sadne
 const validRGB = v => Array.isArray(v) && v.length >= 3 && v.slice(0, 3).every(c => Number.isInteger(c) && c >= 0 && c <= 255)
 const periodOr = (value, fallback, min = 900, max = 6000) => Number.isFinite(value) && value >= min && value <= max ? value : fallback
 
-function estimatedPeriod(scores) {
+export function estimatedPeriod(scores, intensity) {
   const weights = { anger: 1, fear: .75, surprise: .45, sadness: -.25, neutral: .1, love: -.35, joy: -.55, calm: -.7 }
   let total = 0, activation = 0
   for (const [emotion, score] of Object.entries(scores)) {
@@ -23,7 +23,8 @@ function estimatedPeriod(scores) {
   }
   if (!total) return 3200
   activation /= total
-  const rate = activation >= 0 ? 1/3.2 + activation * (1/.9 - 1/3.2) : 1/3.2 + (-activation/.7) * (1/6 - 1/3.2)
+  let rate = activation >= 0 ? 1/3.2 + activation * (1/.9 - 1/3.2) : 1/3.2 + (-activation/.7) * (1/6 - 1/3.2)
+  if (Number.isFinite(intensity) && intensity >= 0 && intensity <= 1) rate *= .55 + .45 * intensity
   return Math.max(900, Math.min(6000, Math.round(1000/rate)))
 }
 
@@ -38,8 +39,11 @@ export function ledViewModel(data) {
   const primary = LED_COLORS[data.dominant ?? data.main_emotion] ?? LED_COLORS[names[0]]
   const colors = Array.isArray(led.top_colors) && led.top_colors.length === 3 && led.top_colors.every(validRGB)
     ? led.top_colors.map(v => v.slice(0, 3)) : names.map(k => LED_COLORS[k])
-  const period = periodOr(led.flow_period_ms, estimatedPeriod(scores))
-  const leftPeriod = periodOr(led.left_flow_period_ms, Math.max(600, Math.min(2400, Math.round(period * .55))), 600, 2400)
+  const motion = data.motion ?? {}
+  const fallbackPeriod = periodOr(motion.flow_period_ms, estimatedPeriod(scores, data.intensity))
+  const period = periodOr(led.flow_period_ms, fallbackPeriod)
+  const fallbackTop = periodOr(motion.top_flow_period_ms, Math.max(600, Math.min(2400, Math.round(period * .55))), 600, 2400)
+  const leftPeriod = periodOr(led.left_flow_period_ms, fallbackTop, 600, 2400)
   let state = 'unavailable', title = 'LED 전송 정보 없음', detail = '이 서버는 LED 전송 상태를 제공하지 않습니다. 아래는 표현 예시입니다.'
   if (led.enabled === false) {
     state = 'preview'; title = '미리보기 모드'; detail = '감정 분석은 완료됐어요. 이 서버에서는 USB LED 전송이 꺼져 있습니다.'
@@ -55,7 +59,7 @@ export function ledViewModel(data) {
       : 'USB 연결·포트 설정을 확인해주세요. 감정 분석 결과는 아래에서 볼 수 있습니다.'
   }
   return { state, title, detail, names, colors, primary: validRGB(led.rgbw) ? led.rgbw.slice(0, 3) : primary,
-    period, leftPeriod, estimated: !Number.isFinite(led.left_flow_period_ms) }
+    period, leftPeriod, estimated: !Number.isFinite(led.left_flow_period_ms) && !Number.isFinite(motion.top_flow_period_ms) }
 }
 
 export function hueOf([r, g, b]) {

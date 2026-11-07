@@ -102,12 +102,13 @@ button, textarea { font: inherit; }
     padding: 17px;
     border: 0;
     border-radius: 16px;
-    background: $primary;
-    color: #103c42;
+    background: linear-gradient(120deg, #def3f5, #cbecef);
+    color: #245d64;
+    border: 1px solid #b9e2e7;
     font-size: 15px;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 8px 22px rgba(59,153,164,.24);
+    box-shadow: 0 8px 22px rgba(59,153,164,.12);
     transition: transform .2s, filter .2s;
 
     &:hover:not(:disabled) { filter: brightness(1.05); }
@@ -178,7 +179,7 @@ button, textarea { font: inherit; }
   border-radius: 50%;
   background: white;
 
-  .emotion-face { font-size: 25px; color: #ffd666; }
+  .emotion-marker { display: block; width: 14px; height: 14px; margin-bottom: 7px; border-radius: 50%; background: $primary; }
   small { font-size: 10px; color: #777; }
   strong { font-size: 22px; font-weight: 750; }
 }

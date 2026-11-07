@@ -95,14 +95,16 @@ def analyze_emotion(request: EmotionRequest):
         analyzer=kote_analyzer
     )
 
+    intensity = result.get("intensity")
+    period_ms = flow_period_ms(result["scores"], intensity)
+    ranked, ranked_colors, top_period = ranked_plan(result["scores"], intensity)
+
     # Explicit opt-in: analysis still succeeds if hardware is unavailable.
     led = {"enabled": bool(LED_PORT), "sent": False}
     if LED_PORT:
         try:
             # Use the dominant emotion for a clear, saturated physical color.
             rgbw = emotion_to_rgbw(result["dominant"])
-            period_ms = flow_period_ms(result["scores"])
-            ranked, ranked_colors, top_period = ranked_plan(result["scores"])
             ack = send_led_rgbw(rgbw, period_ms, ranked_colors, top_period)
             led.update(sent=True, rgbw=rgbw, ack=ack, flow_period_ms=period_ms,
                        top_emotions=ranked, top_colors=ranked_colors,
@@ -113,6 +115,7 @@ def analyze_emotion(request: EmotionRequest):
     return {
         "led": led,
         **result,
+        "motion": {"flow_period_ms": period_ms, "top_flow_period_ms": top_period},
         "emotions": result["scores"],
         "main_emotion": result["dominant"],
     }

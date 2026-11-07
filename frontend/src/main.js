@@ -39,7 +39,7 @@ document.querySelector('#app').innerHTML = `
 
     <!-- 소개 -->
     <section class="intro">
-      <h1>오늘 당신의 감정을<br>분석해볼까요? 🩵</h1>
+      <h1>오늘 당신의 감정을<br>분석해볼까요?</h1>
     </section>
 
     <!-- 감정 입력 -->
@@ -81,7 +81,7 @@ document.querySelector('#app').innerHTML = `
             aria-label="감정 비율 도넛 차트"
           >
             <div class="donut-center">
-              <span class="emotion-face">☺</span>
+              <span class="emotion-marker" id="emotionMarker" aria-hidden="true"></span>
               <small>주요 감정</small>
               <strong id="mainEmotion">-</strong>
             </div>
@@ -91,8 +91,6 @@ document.querySelector('#app').innerHTML = `
         <div class="emotion-list" id="emotionList"></div>
 
       </div>
-
-      <section id="ledSection" class="led-section" hidden aria-label="LED 전송 결과와 효과 미리보기"></section>
 
       <!-- 3×4 감정 말랑이 -->
       <h3>나의 감정 말랑이</h3>
@@ -111,6 +109,8 @@ document.querySelector('#app').innerHTML = `
 >
   말랑이를 터치하면 색상 정보를 볼 수 있어요.
 </div>
+
+      <section id="ledSection" class="led-section" hidden aria-label="LED 전송 결과와 효과 미리보기"></section>
 
 
     </section>
@@ -274,6 +274,7 @@ button.addEventListener('click', async () => {
     )
 
     mainEmotion.textContent = main.name
+    document.querySelector('#emotionMarker').style.background = main.color
 
     // =====================================
     // 9. 감정별 비율 막대그래프

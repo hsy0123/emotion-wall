@@ -2,8 +2,8 @@ from color_mapper import emotion_to_rgbw
 from emotion_motion import flow_period_ms
 
 
-def ranked_plan(scores):
-    period = flow_period_ms(scores)  # Validate the full model schema first.
+def ranked_plan(scores, intensity=None):
+    period = flow_period_ms(scores, intensity)  # Validate the full model schema first.
     ranked = [name for name, value in sorted(scores.items(), key=lambda item: item[1], reverse=True) if value > 0][:3]
     while len(ranked) < 3:
         ranked.append(ranked[0])

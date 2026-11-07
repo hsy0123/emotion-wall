@@ -45,3 +45,11 @@ test('physical top/middle/bottom order preserves the 22-LED ranked row', () => {
   assert.equal(LED_LAYOUT[2].row,0)
   assert.notDeepEqual(previewPixel(m,LED_LAYOUT[2].row,0,0),previewPixel(m,LED_LAYOUT[2].row,0,500))
 })
+
+test('model intensity accelerates preview and server timing remains authoritative', () => {
+  const low=ledViewModel({scores:{anger:.5,joy:.5},intensity:0})
+  const high=ledViewModel({scores:{anger:.5,joy:.5},intensity:1})
+  assert.ok(high.period<low.period)
+  const server=ledViewModel({scores:{joy:1},intensity:0,motion:{flow_period_ms:3100,top_flow_period_ms:1705}})
+  assert.equal(server.period,3100);assert.equal(server.leftPeriod,1705);assert.equal(server.estimated,false)
+})
