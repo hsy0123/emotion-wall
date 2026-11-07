@@ -1,0 +1,11 @@
+frontend/
+.git/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+.DS_Store
+serial_sender.py
+main.py
