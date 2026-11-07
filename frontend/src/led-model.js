@@ -67,12 +67,12 @@ const wrap = n => ((n % 1) + 1) % 1
 const smooth = t => t * t * (3 - 2 * t)
 export const BALL_PERIOD_MS = 12000
 
-// Hold each selected emotion color, then crossfade directly to the next.
+// Blend across the whole interval; no held colors or narrow transition bands.
 // RGB interpolation avoids traversing unrelated hues around the HSV color wheel.
 export function paletteColor(colors, position) {
   const p = wrap(position) * 3, anchor = Math.floor(p)
   const fraction = p - anchor
-  const t = smooth(Math.max(0, Math.min(1, (fraction - .72) / .28)))
+  const t = smooth(fraction)
   const a = colors[anchor], b = colors[(anchor + 1) % 3]
   return a.map((value, channel) => Math.round(value + (b[channel] - value) * t))
 }
@@ -90,7 +90,7 @@ export function ballPixel(model, displayRow, columnPosition, elapsed) {
 }
 
 export function ballGradient(model, displayRow, column, elapsed) {
-  const stops = Array.from({length: 5}, (_, i) =>
-    `rgb(${ballPixel(model, displayRow, column + i / 4, elapsed).join(',')}) ${i * 25}%`)
+  const stops = Array.from({length: 17}, (_, i) =>
+    `rgba(${ballPixel(model, displayRow, column + i / 16, elapsed).join(',')}, 0.46) ${i * 6.25}%`)
   return `linear-gradient(90deg, ${stops.join(', ')})`
 }

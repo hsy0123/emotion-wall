@@ -91,3 +91,16 @@ test('gradient uses the selected RGB colors directly without HSV rainbow hues', 
     assert.ok(!(rgb[0]<60 && rgb[1]<60 && rgb[2]>180),'no unrelated pure blue')
   }
 })
+
+test('palette blends continuously instead of holding then snapping', async () => {
+  const {paletteColor,ballGradient}=await import('../src/led-model.js')
+  const colors=[[255,210,0],[255,0,90],[0,220,255]]
+  assert.notDeepEqual(paletteColor(colors,.1),colors[0])
+  for(let i=0;i<1000;i++) {
+    const a=paletteColor(colors,i/1000),b=paletteColor(colors,(i+1)/1000)
+    assert.ok(a.every((v,ch)=>Math.abs(v-b[ch])<=2))
+  }
+  const css=ballGradient(ledViewModel({scores:{joy:.5,love:.3,surprise:.2}}),2,0,1000)
+  assert.equal((css.match(/rgba\(/g)||[]).length,17)
+  assert.ok(css.includes('0.46'))
+})
