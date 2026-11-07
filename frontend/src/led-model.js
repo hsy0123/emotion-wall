@@ -10,7 +10,7 @@ export const LED_COLORS = {
   sadness: [0, 25, 255], anger: [255, 0, 0], fear: [125, 0, 255],
   calm: [0, 255, 65], neutral: [255, 85, 0],
 }
-export const LABELS = { joy: '기쁨', love: '사랑', surprise: '놀람', sadness: '슬픔', anger: '분노', fear: '불안', calm: '차분함', neutral: '중립' }
+export const LABELS = { joy: '기쁨', love: '사랑', surprise: '놀람', sadness: '슬픔', anger: '분노', fear: '불안', calm: '차분함', neutral: '뚜렷한 감정 없음' }
 const validRGB = v => Array.isArray(v) && v.length >= 3 && v.slice(0, 3).every(c => Number.isInteger(c) && c >= 0 && c <= 255)
 const periodOr = (value, fallback, min = 900, max = 6000) => Number.isFinite(value) && value >= min && value <= max ? value : fallback
 
@@ -31,15 +31,16 @@ export function estimatedPeriod(scores, intensity) {
 export function ledViewModel(data) {
   const led = data.led ?? {}
   const scores = data.scores ?? data.emotions ?? {}
-  const ranked = Object.entries(scores).filter(([k, v]) => LED_COLORS[k] && Number.isFinite(v) && v > 0)
+  const motion = data.motion ?? {}
+  const ranked = Object.entries(scores).filter(([k, v]) => LED_COLORS[k] && k !== 'neutral' && Number.isFinite(v) && v > 0)
     .sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => k)
   if (!ranked.length) ranked.push('neutral')
-  const names = Array.isArray(led.top_emotions) && led.top_emotions.length === 3 && led.top_emotions.every(k => LED_COLORS[k]) ? led.top_emotions : [...ranked]
+  const palette = Array.isArray(led.top_emotions) ? led : motion
+  const names = Array.isArray(palette.top_emotions) && palette.top_emotions.length === 3 && palette.top_emotions.every(k => LED_COLORS[k]) ? palette.top_emotions : [...ranked]
   while (names.length < 3) names.push(names[0])
-  const primary = LED_COLORS[data.dominant ?? data.main_emotion] ?? LED_COLORS[names[0]]
-  const colors = Array.isArray(led.top_colors) && led.top_colors.length === 3 && led.top_colors.every(validRGB)
-    ? led.top_colors.map(v => v.slice(0, 3)) : names.map(k => LED_COLORS[k])
-  const motion = data.motion ?? {}
+  const primary = LED_COLORS[names[0]]
+  const colors = Array.isArray(palette.top_colors) && palette.top_colors.length === 3 && palette.top_colors.every(validRGB)
+    ? palette.top_colors.map(v => v.slice(0, 3)) : names.map(k => LED_COLORS[k])
   const fallbackPeriod = periodOr(motion.flow_period_ms, estimatedPeriod(scores, data.intensity))
   const period = periodOr(led.flow_period_ms, fallbackPeriod)
   const fallbackTop = periodOr(motion.top_flow_period_ms, Math.max(600, Math.min(2400, Math.round(period * .55))), 600, 2400)
@@ -90,4 +91,15 @@ export function previewPixel(model, row, index, elapsed) {
     hue = hueOf(model.primary) + .035 * Math.sin(2 * Math.PI * position) + .008 * Math.sin(4 * Math.PI * position)
   }
   return rgbOf(hue)
+}
+
+// A ball samples one quarter of the corresponding physical LED row.
+// Both views use this exact frame clock, palette and spatial mapping.
+export function ballGradient(model, displayRow, column, elapsed) {
+  const layout = LED_LAYOUT[displayRow]
+  const stops = Array.from({length: 5}, (_, i) => {
+    const position = (column + i / 4) * layout.count / 4
+    return `rgb(${previewPixel(model, layout.row, position, elapsed).join(',')}) ${i * 25}%`
+  })
+  return `linear-gradient(90deg, ${stops.join(', ')})`
 }

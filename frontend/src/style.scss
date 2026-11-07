@@ -102,9 +102,9 @@ button, textarea { font: inherit; }
     padding: 17px;
     border: 0;
     border-radius: 16px;
-    background: linear-gradient(120deg, #def3f5, #cbecef);
+    background: linear-gradient(120deg, #a4dde3, #83ced7);
     color: #245d64;
-    border: 1px solid #b9e2e7;
+    border: 1px solid #77c6d0;
     font-size: 15px;
     font-weight: 700;
     cursor: pointer;
@@ -227,6 +227,8 @@ button, textarea { font: inherit; }
 
 /* 말랑이 영역 */
 .ball-grid {
+  display: grid;
+  gap: 12px;
   position: relative;
   isolation: isolate;
   width: 100%;
@@ -261,15 +263,9 @@ button, textarea { font: inherit; }
   appearance: none;
 
   background:
-    radial-gradient(ellipse at 30% 22%,
-      rgba(255,255,255,.85), rgba(255,255,255,.38) 16%,
-      rgba(255,255,255,.08) 40%, transparent 65%),
-    radial-gradient(circle at 70% 82%,
-      rgba(16,57,64,.12), transparent 65%),
-    radial-gradient(circle at 40% 35%,
-      rgba(var(--ball-rgb),.55),
-      rgba(var(--ball-rgb),.76) 55%,
-      rgba(var(--ball-rgb),.92));
+    radial-gradient(ellipse at 30% 22%, rgba(255,255,255,.35), rgba(255,255,255,.08) 24%, transparent 55%),
+    radial-gradient(circle at 70% 82%, rgba(16,57,64,.10), transparent 65%),
+    var(--ball-gradient, linear-gradient(90deg, #59bec9, #59bec9));
 
   box-shadow:
     inset 0 3px 8px rgba(255,255,255,.42),
@@ -288,8 +284,8 @@ button, textarea { font: inherit; }
     height: 34%;
     border-radius: 50%;
     background: radial-gradient(ellipse,
-      rgba(255,255,255,.72),
-      rgba(255,255,255,.16) 48%,
+      rgba(255,255,255,.28),
+      rgba(255,255,255,.06) 48%,
       transparent 75%);
     filter: blur(7px);
     pointer-events: none;

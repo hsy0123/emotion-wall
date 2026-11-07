@@ -29,4 +29,15 @@ class IntensityTests(unittest.TestCase):
         for intensity in [True,-1,2,float('nan')]:
             with self.assertRaises(ValueError):flow_period_ms({'joy':1},intensity)
 
+
+class RankedPaletteTests(unittest.TestCase):
+    def test_neutral_not_ranked_as_an_emotion(self):
+        from emotion_ranked import ranked_plan
+        names,colors,_=ranked_plan({'love':.5,'neutral':.3,'joy':.2})
+        self.assertEqual(names,['love','joy','love'])
+        self.assertEqual(colors[0],colors[2])
+    def test_no_clear_emotion_has_a_safe_fallback(self):
+        from emotion_ranked import ranked_plan
+        self.assertEqual(ranked_plan({'neutral':1})[0],['neutral']*3)
+
 if __name__=='__main__':unittest.main()

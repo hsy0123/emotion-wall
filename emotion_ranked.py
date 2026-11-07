@@ -4,7 +4,9 @@ from emotion_motion import flow_period_ms
 
 def ranked_plan(scores, intensity=None):
     period = flow_period_ms(scores, intensity)  # Validate the full model schema first.
-    ranked = [name for name, value in sorted(scores.items(), key=lambda item: item[1], reverse=True) if value > 0][:3]
+    ranked = [name for name, value in sorted(scores.items(), key=lambda item: item[1], reverse=True) if name != "neutral" and value > 0][:3]
+    if not ranked:
+        ranked = ["neutral"]
     while len(ranked) < 3:
         ranked.append(ranked[0])
     return ranked, [emotion_to_rgbw(name) for name in ranked], max(600, min(2400, round(period * 0.55)))

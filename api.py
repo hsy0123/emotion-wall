@@ -2,7 +2,6 @@
 import os
 from threading import Lock
 
-from color_mapper import emotion_to_rgbw
 from serial_sender import SerialSender
 from emotion_motion import flow_period_ms
 from emotion_ranked import ranked_plan
@@ -104,7 +103,7 @@ def analyze_emotion(request: EmotionRequest):
     if LED_PORT:
         try:
             # Use the dominant emotion for a clear, saturated physical color.
-            rgbw = emotion_to_rgbw(result["dominant"])
+            rgbw = ranked_colors[0]
             ack = send_led_rgbw(rgbw, period_ms, ranked_colors, top_period)
             led.update(sent=True, rgbw=rgbw, ack=ack, flow_period_ms=period_ms,
                        top_emotions=ranked, top_colors=ranked_colors,
@@ -115,7 +114,8 @@ def analyze_emotion(request: EmotionRequest):
     return {
         "led": led,
         **result,
-        "motion": {"flow_period_ms": period_ms, "top_flow_period_ms": top_period},
+        "motion": {"flow_period_ms": period_ms, "top_flow_period_ms": top_period,
+                   "top_emotions": ranked, "top_colors": ranked_colors},
         "emotions": result["scores"],
         "main_emotion": result["dominant"],
     }

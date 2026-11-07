@@ -1,6 +1,6 @@
 import { ledViewModel, previewPixel, LABELS, LED_LAYOUT } from './led-model.js'
 
-export function createLedView(root) {
+export function createLedView(root, onFrame = () => {}) {
   root.innerHTML = `
     <div class="led-heading"><div><span class="eyebrow">EMOTION IN LIGHT</span><h3>빛으로 보는 나의 감정</h3></div><span class="led-badge" id="ledBadge"></span></div>
     <p class="led-message" id="ledMessage" role="status" aria-live="polite"></p>
@@ -22,6 +22,7 @@ export function createLedView(root) {
       const color = previewPixel(model, row, i, elapsed).join(',')
       pixel.style.setProperty('--pixel-rgb', color)
     }))
+    onFrame(model, elapsed)
   }
   function tick(time) {
     frame = 0
@@ -50,11 +51,16 @@ export function createLedView(root) {
       root.hidden = false; root.dataset.state = model.state
       badge.textContent = model.state === 'sent' ? '전달 확인' : model.state === 'error' ? '전송 실패' : '표현 예시'
       message.textContent = `${model.title} — ${model.detail}`
-      ranking.replaceChildren(...model.names.map((name, i) => {
+      const rankedEntries = model.names.map((name, index) => ({name, color: model.colors[index]}))
+        .filter((item, index, items) => item.name !== 'neutral' && items.findIndex(other => other.name === item.name) === index)
+      ranking.replaceChildren(...rankedEntries.map(({name, color}, i) => {
         const li = document.createElement('li'), dot = document.createElement('span')
-        dot.className = 'rank-color'; dot.style.background = `rgb(${model.colors[i].join(',')})`
+        dot.className = 'rank-color'; dot.style.background = `rgb(${color.join(',')})`
         li.append(dot, document.createTextNode(`${i+1}순위 ${LABELS[name]}`)); return li
       }))
+      if (!rankedEntries.length) {
+        const li = document.createElement('li'); li.textContent = '뚜렷한 감정이 없어 기본색으로 표현해요.'; ranking.append(li)
+      }
       speedLabels.forEach(el => { const row = Number(el.dataset.row); el.textContent = `${model.estimated ? '예상 ' : ''}${((row ? model.period : model.leftPeriod)/1000).toFixed(2)}초 / 주기` })
       note.textContent = '화면은 효과를 이해하기 위한 예시입니다. 실제 LED의 밝기·방향·전환 시점은 다를 수 있어요. 재생·멈추기는 이 미리보기에만 적용됩니다.'
       paint(); sync()

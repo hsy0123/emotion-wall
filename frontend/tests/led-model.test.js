@@ -53,3 +53,27 @@ test('model intensity accelerates preview and server timing remains authoritativ
   const server=ledViewModel({scores:{joy:1},intensity:0,motion:{flow_period_ms:3100,top_flow_period_ms:1705}})
   assert.equal(server.period,3100);assert.equal(server.leftPeriod,1705);assert.equal(server.estimated,false)
 })
+
+test('neutral is excluded from emotion ranking; missing ranks repeat real colors', () => {
+  const m=ledViewModel({scores:{love:.5,neutral:.3,joy:.2}})
+  assert.deepEqual(m.names,['love','joy','love'])
+  assert.deepEqual(m.primary,[255,0,90])
+  const fallback=ledViewModel({scores:{neutral:1}})
+  assert.deepEqual(fallback.names,['neutral','neutral','neutral'])
+})
+
+test('each ball uses the corresponding LED row and same animation time', async () => {
+  const {ballGradient}=await import('../src/led-model.js')
+  const m=ledViewModel({dominant:'love',scores:{love:.5,joy:.3,sadness:.2}})
+  for(let displayRow=0;displayRow<3;displayRow++)for(let column=0;column<4;column++) {
+    const layout=LED_LAYOUT[displayRow]
+    for(const time of [0,400,1200]) {
+      const css=ballGradient(m,displayRow,column,time)
+      for(let stop=0;stop<5;stop++) {
+        const pixel=(column+stop/4)*layout.count/4
+        assert.ok(css.includes(`rgb(${previewPixel(m,layout.row,pixel,time).join(',')}) ${stop*25}%`))
+      }
+    }
+  }
+  assert.notEqual(ballGradient(m,2,0,0),ballGradient(m,2,0,400))
+})

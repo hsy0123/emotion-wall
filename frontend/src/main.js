@@ -2,6 +2,7 @@
 import './style.scss'
 import brandLogo from './assets/emotion-wall-logo.png'
 import { createLedView } from './led-view.js'
+import { ballGradient, previewPixel, LED_LAYOUT } from './led-model.js'
 
 // 백엔드 주소: 배포 시 VITE_API_URL 환경변수로 지정 (없으면 로컬 서버 사용)
 const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '')
@@ -18,7 +19,7 @@ const emotionConfig = [
   { key: 'sadness', name: '슬픔', color: '#3A5CBE' },
   { key: 'anger', name: '분노', color: '#E63946' },
   { key: 'fear', name: '두려움/불안', color: '#5E3C99' },
-  { key: 'neutral', name: '평온/중립', color: '#FFE9C7' },
+  { key: 'neutral', name: '뚜렷한 감정 없음', color: '#FFE9C7' },
 ]
 
 // =====================================
@@ -124,7 +125,16 @@ const emotionList = document.querySelector('#emotionList')
 const resultDate = document.querySelector('#resultDate')
 const ballGrid = document.querySelector('#ballGrid')
 const analysisError = document.querySelector('#analysisError')
-const ledView = createLedView(document.querySelector('#ledSection'))
+let ballElements = []
+const ledView = createLedView(document.querySelector('#ledSection'), (model, elapsed) => {
+  ballElements.forEach((ball, index) => {
+    const row = Math.floor(index / 4), column = index % 4
+    ball.style.setProperty('--ball-gradient', ballGradient(model, row, column, elapsed))
+    const layout = LED_LAYOUT[row]
+    const rgb = previewPixel(model, layout.row, (column + .5) * layout.count / 4, elapsed)
+    ball.style.setProperty('--ball-rgb', rgb.join(','))
+  })
+})
 
 // =====================================
 // 4. 입력 글자 수 표시
@@ -176,7 +186,6 @@ button.addEventListener('click', async () => {
     }
 
     const data = await response.json()
-    ledView.update(data)
 
     // =====================================
     // 6. 감정별 비율 계산
@@ -303,39 +312,14 @@ button.addEventListener('click', async () => {
     // 10. Soft Glow 감정 말랑이
     // =====================================
 
-    if (!Array.isArray(data.leds) || !data.grid) {
-      throw new Error('말랑이 색상 데이터가 없습니다.')
-    }
-
-    // A파트 grid 설정 적용
-    ballGrid.style.display = 'grid'
-    ballGrid.style.gridTemplateColumns =
-      `repeat(${data.grid.cols}, minmax(0, 1fr))`
-
-    ballGrid.style.gap = '12px'
-    ballGrid.style.marginTop = '24px'
-
-    // 배선 index와 실제 화면 위치(row, col)는
-    // 다를 수 있으므로 위치를 명시적으로 지정
-    
-    ballGrid.innerHTML = data.leds
-      .map((led) => {
-        const [r, g, b] = led.rgb
-
-        return `
-          <div
-            class="emotion-ball"
-            role="img"
-            style="
-              --ball-rgb: ${r}, ${g}, ${b};
-              grid-row: ${led.row + 1};
-              grid-column: ${led.col + 1};
-            "
-            aria-label="감정색 말랑이 ${led.index + 1}"
-          ></div>
-        `
-      })
-      .join('')
+    // Match the physical layout: top/middle dominant color; bottom ranked palette.
+    ballGrid.style.gridTemplateColumns = 'repeat(4, minmax(0, 1fr))'
+    ballGrid.innerHTML = Array.from({ length: 12 }, (_, index) => `
+      <div class="emotion-ball" role="img"
+        aria-label="${['맨 위', '가운데', '맨 아래'][Math.floor(index / 4)]} 줄 감정색 말랑이 ${index % 4 + 1}"></div>
+    `).join('')
+    ballElements = [...ballGrid.children]
+    ledView.update(data)
 
     // =====================================
     // 11. 분석 날짜 표시
