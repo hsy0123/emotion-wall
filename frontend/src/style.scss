@@ -104,7 +104,7 @@ button, textarea { font: inherit; }
     border-radius: 16px;
     background: linear-gradient(120deg, #a4dde3, #83ced7);
     color: #245d64;
-    border: 1px solid #77c6d0;
+    border: 1px solid rgba(89, 190, 201, .10);
     font-size: 15px;
     font-weight: 700;
     cursor: pointer;
@@ -370,3 +370,5 @@ button, textarea { font: inherit; }
 .led-preview-footer p { margin: 13px 0 5px; color: #55767b; font-size: 11px; line-height: 1.7; }
 .preview-toggle { border: 1px solid #bedfe4; background: white; color: #2f6570; padding: 8px 12px; border-radius: 10px; font-size: 12px; cursor: pointer; }
 .preview-toggle:focus-visible { outline: 3px solid #23838f; outline-offset: 3px; }
+
+.ball-caption { margin: -14px 0 22px; color: #55767b; font-size: 12px; line-height: 1.7; }

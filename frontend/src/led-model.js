@@ -63,43 +63,34 @@ export function ledViewModel(data) {
     period, leftPeriod, estimated: !Number.isFinite(led.left_flow_period_ms) && !Number.isFinite(motion.top_flow_period_ms) }
 }
 
-export function hueOf([r, g, b]) {
-  const high = Math.max(r, g, b), low = Math.min(r, g, b), d = high - low
-  if (!d) return .11
-  const h = high === r ? (g - b) / d : high === g ? (b - r) / d + 2 : (r - g) / d + 4
-  return ((h / 6) % 1 + 1) % 1
-}
 const wrap = n => ((n % 1) + 1) % 1
 const smooth = t => t * t * (3 - 2 * t)
-function rgbOf(hue) {
-  const h = wrap(hue) * 6, x = 1 - Math.abs(h % 2 - 1)
-  return [[1,x,0],[x,1,0],[0,1,x],[0,x,1],[x,0,1],[1,0,x]][Math.floor(h)].map(c => Math.round(c * 255))
-}
-export function previewPixel(model, row, index, elapsed) {
-  const length = row === 0 ? 22 : 21
-  const phase = elapsed / (row === 0 ? model.leftPeriod : model.period)
-  const position = index / length - phase
-  let hue
-  if (row === 0) {
-    const p = wrap(-position) * 3, anchor = Math.floor(p)
-    const a = hueOf(model.colors[anchor]), b = hueOf(model.colors[(anchor + 1) % 3])
-    let d = b - a
-    if (d > .5) d -= 1
-    if (d < -.5) d += 1
-    hue = a + d * smooth(p - anchor)
-  } else {
-    hue = hueOf(model.primary) + .035 * Math.sin(2 * Math.PI * position) + .008 * Math.sin(4 * Math.PI * position)
-  }
-  return rgbOf(hue)
+export const BALL_PERIOD_MS = 12000
+
+// Hold each selected emotion color, then crossfade directly to the next.
+// RGB interpolation avoids traversing unrelated hues around the HSV color wheel.
+export function paletteColor(colors, position) {
+  const p = wrap(position) * 3, anchor = Math.floor(p)
+  const fraction = p - anchor
+  const t = smooth(Math.max(0, Math.min(1, (fraction - .72) / .28)))
+  const a = colors[anchor], b = colors[(anchor + 1) % 3]
+  return a.map((value, channel) => Math.round(value + (b[channel] - value) * t))
 }
 
-// A ball samples one quarter of the corresponding physical LED row.
-// Both views use this exact frame clock, palette and spatial mapping.
+export function previewPixel(model, row, index, elapsed) {
+  if (row !== 0) return [...model.primary]
+  return paletteColor(model.colors, elapsed / model.leftPeriod - index / 22)
+}
+
+// The soft balls intentionally use a slower, independent display period.
+// Their palette and row assignment still follow the actual emotion commands.
+export function ballPixel(model, displayRow, columnPosition, elapsed) {
+  if (displayRow !== 2) return [...model.primary]
+  return paletteColor(model.colors, elapsed / BALL_PERIOD_MS - columnPosition / 4)
+}
+
 export function ballGradient(model, displayRow, column, elapsed) {
-  const layout = LED_LAYOUT[displayRow]
-  const stops = Array.from({length: 5}, (_, i) => {
-    const position = (column + i / 4) * layout.count / 4
-    return `rgb(${previewPixel(model, layout.row, position, elapsed).join(',')}) ${i * 25}%`
-  })
+  const stops = Array.from({length: 5}, (_, i) =>
+    `rgb(${ballPixel(model, displayRow, column + i / 4, elapsed).join(',')}) ${i * 25}%`)
   return `linear-gradient(90deg, ${stops.join(', ')})`
 }

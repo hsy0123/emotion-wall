@@ -62,18 +62,32 @@ test('neutral is excluded from emotion ranking; missing ranks repeat real colors
   assert.deepEqual(fallback.names,['neutral','neutral','neutral'])
 })
 
-test('each ball uses the corresponding LED row and same animation time', async () => {
-  const {ballGradient}=await import('../src/led-model.js')
-  const m=ledViewModel({dominant:'love',scores:{love:.5,joy:.3,sadness:.2}})
-  for(let displayRow=0;displayRow<3;displayRow++)for(let column=0;column<4;column++) {
-    const layout=LED_LAYOUT[displayRow]
-    for(const time of [0,400,1200]) {
-      const css=ballGradient(m,displayRow,column,time)
-      for(let stop=0;stop<5;stop++) {
-        const pixel=(column+stop/4)*layout.count/4
-        assert.ok(css.includes(`rgb(${previewPixel(m,layout.row,pixel,time).join(',')}) ${stop*25}%`))
-      }
-    }
+test('balls hold the primary color on the first two rows and loop slowly on the last', async () => {
+  const {ballPixel, ballGradient, BALL_PERIOD_MS}=await import('../src/led-model.js')
+  const m=ledViewModel({scores:{joy:.5,love:.3,surprise:.2}})
+  assert.equal(BALL_PERIOD_MS,12000)
+  for (const time of [0,300,2000,6000]) for(let column=0;column<4;column++) {
+    assert.deepEqual(ballPixel(m,0,column,time),m.primary)
+    assert.deepEqual(ballPixel(m,1,column,time),m.primary)
+    assert.equal(typeof ballGradient(m,2,column,time),'string')
   }
-  assert.notEqual(ballGradient(m,2,0,0),ballGradient(m,2,0,400))
+  assert.deepEqual(ballPixel(m,2,0,0),ballPixel(m,2,0,12000))
+  assert.notDeepEqual(ballPixel(m,2,0,0),ballPixel(m,2,0,4000))
+  for(let time=0;time<12000;time+=100) {
+    const a=ballPixel(m,2,0,time), b=ballPixel(m,2,0,time+100)
+    assert.ok(a.every((value,ch)=>Math.abs(value-b[ch])<36))
+  }
+})
+
+test('gradient uses the selected RGB colors directly without HSV rainbow hues', async () => {
+  const {paletteColor}=await import('../src/led-model.js')
+  const colors=[[255,210,0],[255,0,90],[0,220,255]]
+  assert.deepEqual(paletteColor(colors,0),colors[0])
+  assert.deepEqual(paletteColor(colors,1/3),colors[1])
+  assert.deepEqual(paletteColor(colors,2/3),colors[2])
+  for(let i=0;i<300;i++) {
+    const rgb=paletteColor(colors,i/300)
+    assert.ok(!(rgb[0]<60 && rgb[1]>180 && rgb[2]<60),'no unrelated pure green')
+    assert.ok(!(rgb[0]<60 && rgb[1]<60 && rgb[2]>180),'no unrelated pure blue')
+  }
 })

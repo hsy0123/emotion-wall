@@ -2,7 +2,7 @@
 import './style.scss'
 import brandLogo from './assets/emotion-wall-logo.png'
 import { createLedView } from './led-view.js'
-import { ballGradient, previewPixel, LED_LAYOUT } from './led-model.js'
+import { ballGradient, ballPixel } from './led-model.js'
 
 // 백엔드 주소: 배포 시 VITE_API_URL 환경변수로 지정 (없으면 로컬 서버 사용)
 const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '')
@@ -95,6 +95,7 @@ document.querySelector('#app').innerHTML = `
 
       <!-- 3×4 감정 말랑이 -->
       <h3>나의 감정 말랑이</h3>
+      <p class="ball-caption">선택된 감정색이 천천히 흐르는 표현 예시예요.</p>
 
       <div
         id="ballGrid"
@@ -130,8 +131,7 @@ const ledView = createLedView(document.querySelector('#ledSection'), (model, ela
   ballElements.forEach((ball, index) => {
     const row = Math.floor(index / 4), column = index % 4
     ball.style.setProperty('--ball-gradient', ballGradient(model, row, column, elapsed))
-    const layout = LED_LAYOUT[row]
-    const rgb = previewPixel(model, layout.row, (column + .5) * layout.count / 4, elapsed)
+    const rgb = ballPixel(model, row, column + .5, elapsed)
     ball.style.setProperty('--ball-rgb', rgb.join(','))
   })
 })

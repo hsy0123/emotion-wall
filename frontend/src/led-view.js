@@ -62,7 +62,7 @@ export function createLedView(root, onFrame = () => {}) {
         const li = document.createElement('li'); li.textContent = '뚜렷한 감정이 없어 기본색으로 표현해요.'; ranking.append(li)
       }
       speedLabels.forEach(el => { const row = Number(el.dataset.row); el.textContent = `${model.estimated ? '예상 ' : ''}${((row ? model.period : model.leftPeriod)/1000).toFixed(2)}초 / 주기` })
-      note.textContent = '화면은 효과를 이해하기 위한 예시입니다. 실제 LED의 밝기·방향·전환 시점은 다를 수 있어요. 재생·멈추기는 이 미리보기에만 적용됩니다.'
+      note.textContent = '화면은 효과를 이해하기 위한 예시입니다. 실제 LED의 색 전환·밝기·방향은 다를 수 있어요. 말랑이는 이 예시보다 천천히 움직입니다. 재생·멈추기는 이 미리보기에만 적용됩니다.'
       paint(); sync()
     },
   }
