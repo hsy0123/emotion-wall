@@ -1,6 +1,9 @@
 
 import './style.scss'
 
+// 백엔드 주소: 배포 시 VITE_API_URL 환경변수로 지정 (없으면 로컬 서버 사용)
+const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '')
+
 // =====================================
 // 1. 감정별 표시 설정
 // A파트 palette.json 기준
@@ -156,7 +159,7 @@ button.addEventListener('click', async () => {
 
   try {
     // FastAPI 서버로 분석 요청
-    const response = await fetch('http://127.0.0.1:8000/analyze', {
+    const response = await fetch(`${API_URL}/analyze`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
