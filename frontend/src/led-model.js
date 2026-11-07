@@ -1,3 +1,9 @@
+// Physical display order; row IDs retain their existing USB/data mapping.
+export const LED_LAYOUT = [
+  { row: 2, label: '맨 위', count: 21 },
+  { row: 1, label: '가운데', count: 21 },
+  { row: 0, label: '맨 아래', count: 22 },
+]
 // The RGB palette mirrors color_mapper.py; the soft web chart keeps its own palette.
 export const LED_COLORS = {
   joy: [255, 210, 0], love: [255, 0, 90], surprise: [0, 220, 255],

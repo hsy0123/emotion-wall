@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { ledViewModel, previewPixel } from '../src/led-model.js'
+import { ledViewModel, previewPixel, LED_LAYOUT } from '../src/led-model.js'
 const base = { dominant: 'joy', scores: { joy: .6, sadness: .3, anger: .1 } }
 test('old/cloud API is explicitly a preview, never claims hardware success', () => {
   assert.equal(ledViewModel(base).state, 'unavailable')
@@ -36,4 +36,12 @@ test('invalid server palette falls back to valid local colors', () => {
 test('cloud preview estimates emotion-driven speed without USB', () => {
   assert.ok(ledViewModel({scores:{anger:1}}).leftPeriod < ledViewModel({scores:{joy:1}}).leftPeriod)
   assert.equal(ledViewModel({scores:{sadness:1}}).state,'unavailable')
+})
+
+test('physical top/middle/bottom order preserves the 22-LED ranked row', () => {
+  assert.deepEqual(LED_LAYOUT.map(x=>[x.label,x.row,x.count]), [['맨 위',2,21],['가운데',1,21],['맨 아래',0,22]])
+  assert.equal(LED_LAYOUT.reduce((n,x)=>n+x.count,0),64)
+  const m=ledViewModel({scores:{joy:.6,sadness:.4},led:{flow_period_ms:4000,left_flow_period_ms:2000}})
+  assert.equal(LED_LAYOUT[2].row,0)
+  assert.notDeepEqual(previewPixel(m,LED_LAYOUT[2].row,0,0),previewPixel(m,LED_LAYOUT[2].row,0,500))
 })
