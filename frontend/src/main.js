@@ -1,5 +1,6 @@
 
 import './style.scss'
+import { createLedView } from './led-view.js'
 
 // 백엔드 주소: 배포 시 VITE_API_URL 환경변수로 지정 (없으면 로컬 서버 사용)
 const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '')
@@ -58,6 +59,8 @@ document.querySelector('#app').innerHTML = `
       </button>
     </section>
 
+    <p id="analysisError" class="analysis-error" role="alert" hidden></p>
+
     <!-- 분석 결과 -->
     <section id="resultSection" class="result-section" hidden>
 
@@ -87,6 +90,8 @@ document.querySelector('#app').innerHTML = `
         <div class="emotion-list" id="emotionList"></div>
 
       </div>
+
+      <section id="ledSection" class="led-section" hidden aria-label="LED 전송 결과와 효과 미리보기"></section>
 
       <!-- 3×4 감정 말랑이 -->
       <h3>나의 감정 말랑이</h3>
@@ -126,6 +131,8 @@ const mainEmotion = document.querySelector('#mainEmotion')
 const emotionList = document.querySelector('#emotionList')
 const resultDate = document.querySelector('#resultDate')
 const ballGrid = document.querySelector('#ballGrid')
+const analysisError = document.querySelector('#analysisError')
+const ledView = createLedView(document.querySelector('#ledSection'))
 
 // =====================================
 // 4. 입력 글자 수 표시
@@ -149,6 +156,10 @@ button.addEventListener('click', async () => {
   }
 
   
+  analysisError.hidden = true
+  ledView.pending()
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 90000)
   button.disabled = true
   button.innerHTML = `
     <span class="loading-spinner" aria-hidden="true"></span>
@@ -161,6 +172,7 @@ button.addEventListener('click', async () => {
     // FastAPI 서버로 분석 요청
     const response = await fetch(`${API_URL}/analyze`, {
       method: 'POST',
+      signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -172,6 +184,7 @@ button.addEventListener('click', async () => {
     }
 
     const data = await response.json()
+    ledView.update(data)
 
     // =====================================
     // 6. 감정별 비율 계산
@@ -344,9 +357,6 @@ button.addEventListener('click', async () => {
     // 결과 영역 표시
     resultSection.hidden = false
 
-    // 결과 영역 표시
-    resultSection.hidden = false
-
     // 분석 결과로 부드럽게 자동 스크롤
     const reduceMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)'
@@ -360,9 +370,13 @@ button.addEventListener('click', async () => {
 
   } catch (error) {
     console.error(error)
-    alert('감정 분석에 실패했습니다: ' + error.message)
+    analysisError.textContent = error.name === 'AbortError'
+      ? '분석 응답이 늦어지고 있어요. 잠시 후 다시 시도해주세요.'
+      : '감정 분석 서버에 연결하지 못했어요. 인터넷 연결과 서버 실행 상태를 확인하고 다시 시도해주세요.'
+    analysisError.hidden = false
 
   } finally {
+    clearTimeout(timeout)
     button.disabled = false
     button.textContent = '감정 분석하기'
     button.removeAttribute('aria-busy')

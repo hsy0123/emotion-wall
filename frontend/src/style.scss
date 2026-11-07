@@ -369,3 +369,40 @@ button, textarea { font: inherit; }
     transition-duration: .01ms !important;
   }
 }
+
+.analysis-error {
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: #fff1f0;
+  color: #9b3434;
+  font-size: 14px;
+  line-height: 1.7;
+  &[hidden] { display: none; }
+}
+.led-section {
+  margin-top: 36px;
+  padding: 22px 18px;
+  border: 1px solid #e8e0f6;
+  border-radius: 22px;
+  background: linear-gradient(155deg, #fbf9ff, #f3effa);
+  &[hidden] { display: none; }
+  h3 { margin: 6px 0 0; font-size: 17px; }
+  .eyebrow { font-size: 9px; font-weight: 700; letter-spacing: .12em; color: #88729f; }
+}
+.led-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.led-badge { flex-shrink: 0; padding: 6px 9px; border-radius: 20px; background: #e9e2f6; color: #65527d; font-size: 11px; font-weight: 700; }
+[data-state='sent'] .led-badge { background: #dff1e5; color: #28613d; }
+[data-state='error'] .led-badge { background: #ffe3dd; color: #9c3f2b; }
+.led-message { margin: 14px 0; font-size: 12px; line-height: 1.8; color: #655b72; }
+.led-ranking { display: flex; flex-wrap: wrap; gap: 7px; list-style: none; padding: 0; margin: 0 0 18px; }
+.led-ranking li { display: flex; align-items: center; gap: 6px; padding: 6px 8px; background: white; border-radius: 10px; font-size: 11px; color: #5c506c; }
+.rank-color { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #0001; }
+.led-preview { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; padding: 18px 10px; background: #211c30; border-radius: 18px; }
+.led-column { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 0; }
+.led-row-label, .led-speed { font-size: 10px; color: #e0d6ed; white-space: nowrap; }
+.led-strip { display: flex; flex-direction: column-reverse; justify-content: space-between; height: 270px; width: 20px; padding: 5px; background: #3b334a; border-radius: 6px; }
+.led-pixel { display: block; flex-shrink: 0; width: 10px; height: 7px; border-radius: 3px; background: rgb(var(--pixel-rgb)); box-shadow: 0 0 8px rgba(var(--pixel-rgb), .7); }
+.led-preview-footer { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.led-preview-footer p { margin: 13px 0 5px; color: #7c7188; font-size: 11px; line-height: 1.7; }
+.preview-toggle { border: 1px solid #d8cce8; background: white; color: #6c5488; padding: 8px 12px; border-radius: 10px; font-size: 12px; cursor: pointer; }
+.preview-toggle:focus-visible { outline: 3px solid #9477e8; outline-offset: 3px; }

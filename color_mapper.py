@@ -1,14 +1,16 @@
 
 # color_mapper.py
 
-# 감정별 RGBW 색상 정의 (임시값)
+# 실제 LED용 대표색: 색이 희게 섞이지 않도록 W=0. 웹 팔레트와 독립적입니다.
 EMOTION_COLORS = {
-    "joy": (255, 180, 0, 0),
-    "sadness": (0, 50, 255, 0),
-    "anger": (255, 0, 0, 0),
-    "fear": (100, 0, 150, 0),
-    "calm": (80, 160, 120, 40),
-    "neutral": (0, 0, 0, 120)
+    "joy": (255, 210, 0, 0),       # 선명한 노랑
+    "love": (255, 0, 90, 0),       # 진한 핑크
+    "surprise": (0, 220, 255, 0),  # 청록/시안
+    "sadness": (0, 25, 255, 0),    # 진한 파랑
+    "anger": (255, 0, 0, 0),       # 순수 빨강
+    "fear": (125, 0, 255, 0),      # 보라
+    "calm": (0, 255, 65, 0),      # 초록
+    "neutral": (255, 85, 0, 0),    # 앰버
 }
 
 
@@ -26,7 +28,7 @@ def rgbw_to_serial(rgbw):
         raise ValueError("RGBW 값은 4개여야 합니다.")
 
     if any(
-        not isinstance(v, int) or not 0 <= v <= 255
+        type(v) is not int or not 0 <= v <= 255
         for v in rgbw
     ):
         raise ValueError("RGBW 값은 0~255의 정수여야 합니다.")

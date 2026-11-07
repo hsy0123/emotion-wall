@@ -24,3 +24,6 @@ frontend/dist/
 # Editor
 .vscode/
 .idea/
+
+# Local hardware backups
+backup-*/
