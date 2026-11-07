@@ -39,7 +39,7 @@ document.querySelector('#app').innerHTML = `
 
     <!-- 소개 -->
     <section class="intro">
-      <h1>오늘 당신의 감정을<br>분석해볼까요? 💜</h1>
+      <h1>오늘 당신의 감정을<br>분석해볼까요? 🩵</h1>
     </section>
 
     <!-- 감정 입력 -->
