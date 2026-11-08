@@ -4,8 +4,8 @@ export const appTemplate = `
   <main class="emotion-app">
     <header class="app-header">
       <div class="brand">
-        <img class="brand-icon" src="${brandLogo}" alt="" width="36" height="36" aria-hidden="true">
-        <strong>Emotion Wall</strong>
+        <img class="brand-icon" src="${brandLogo}" alt="" width="44" height="44" aria-hidden="true">
+        <div class="brand-name"><strong>말랑콜리</strong></div>
       </div>
       <span class="menu-icon" aria-hidden="true">☰</span>
     </header>

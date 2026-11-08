@@ -1,6 +1,23 @@
 
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
+// 온글잎 박다현체 · 웹폰트 안내: https://noonnu.cc/font_page/1541
+@font-face {
+  font-family: 'OwnglyphParkDahyun';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LeeSeoyun';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2202-2@1.0/LeeSeoyun.woff') format('woff');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 $primary: #59bec9;
 $text: #183e43;
 $muted: #6e898d;
@@ -45,7 +62,21 @@ button, textarea { font: inherit; }
     gap: 10px;
     font-size: 17px;
   }
-  .brand-icon { display: block; width: 36px; height: 36px; flex-shrink: 0; object-fit: contain; }
+  .brand-name {
+    display: flex;
+    align-items: center;
+    height: 44px;
+    strong {
+      // Optical alignment for the handwritten font's visible letter shapes.
+      transform: translateY(2px);
+      font-family: 'OwnglyphParkDahyun', 'Pretendard', sans-serif;
+      font-size: 32px;
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+  }
+  .brand-icon { display: block; width: 44px; height: 44px; flex-shrink: 0; object-fit: contain; }
   .menu-icon { color: #365b60; font-size: 20px; }
 }
 
@@ -53,9 +84,11 @@ button, textarea { font: inherit; }
   margin-bottom: 25px;
   h1 {
     margin: 0;
-    font-size: 26px;
-    line-height: 1.5;
-    letter-spacing: -.7px;
+    font-family: 'LeeSeoyun', 'Pretendard', sans-serif;
+    font-size: 36px;
+    font-weight: 400;
+    line-height: 1.35;
+    letter-spacing: 0;
     word-break: keep-all;
   }
 }
