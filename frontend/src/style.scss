@@ -388,8 +388,3 @@ button, textarea { font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .emotion-ball.squish { animation: none; }
 }
-
-.led-connection { margin: -4px 0 15px; color: #55767b; font-size: 11px; }
-.led-connection summary { width: fit-content; cursor: pointer; padding: 4px 0; }
-.led-connection .led-message { margin: 7px 0 12px; }
-.led-preview-footer p { white-space: pre-line; }

@@ -95,7 +95,7 @@ document.querySelector('#app').innerHTML = `
 
       <!-- 3×4 감정 말랑이 -->
       <h3>나의 감정 말랑이</h3>
-      <p class="ball-caption">말랑이를 눌러보세요.</p>
+      <p class="ball-caption">나의 감정 말랑이를 화면에서 미리 확인하세요. 말랑이를 눌러보세요.</p>
 
       <div
         id="ballGrid"
