@@ -95,7 +95,7 @@ document.querySelector('#app').innerHTML = `
 
       <!-- 3×4 감정 말랑이 -->
       <h3>나의 감정 말랑이</h3>
-      <p class="ball-caption">선택된 감정색이 천천히 흐르는 표현 예시예요.</p>
+      <p class="ball-caption">말랑이를 눌러보세요.</p>
 
       <div
         id="ballGrid"
