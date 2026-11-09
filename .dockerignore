@@ -1,0 +1,15 @@
+frontend/
+.git/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+.DS_Store
+main.py
+
+backup-*/
+firmware/
+test_*.py
+tests/

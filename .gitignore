@@ -1,0 +1,29 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+
+# Node.js
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# AI model files
+.cache/
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Local hardware backups
+backup-*/
