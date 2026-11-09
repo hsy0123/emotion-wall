@@ -1,5 +1,19 @@
 
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+// 강원교육모두체 · https://noonnu.cc/font_page/802
+@font-face {
+  font-family: 'GangwonEducationModu';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEdu_OTFLightA.woff') format('woff');
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'GangwonEducationModu';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEdu_OTFBoldA.woff') format('woff');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
 
 // 온글잎 박다현체 · 웹폰트 안내: https://noonnu.cc/font_page/1541
 @font-face {
@@ -30,7 +44,10 @@ body {
   min-width: 320px;
   min-height: 100vh;
   color: $text;
-  font-family: 'Pretendard', -apple-system, sans-serif;
+  font-family: 'GangwonEducationModu', -apple-system, sans-serif;
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 1.6;
   letter-spacing: -0.025em;
   -webkit-font-smoothing: antialiased;
   background:
@@ -54,7 +71,8 @@ button, textarea { font: inherit; }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 45px;
+  margin-bottom: 61px;
+  padding-inline: 12px;
 
   .brand {
     display: flex;
@@ -65,27 +83,27 @@ button, textarea { font: inherit; }
   .brand-name {
     display: flex;
     align-items: center;
-    height: 44px;
+    height: 32px;
     strong {
       // Optical alignment for the handwritten font's visible letter shapes.
-      transform: translateY(2px);
+      transform: translateY(1px);
       font-family: 'OwnglyphParkDahyun', 'Pretendard', sans-serif;
-      font-size: 32px;
+      font-size: 26px;
       font-weight: 400;
       line-height: 1;
       letter-spacing: 0;
     }
   }
-  .brand-icon { display: block; width: 44px; height: 44px; flex-shrink: 0; object-fit: contain; }
-  .menu-icon { color: #365b60; font-size: 20px; }
+  .brand-icon { display: block; width: 32px; height: 32px; flex-shrink: 0; object-fit: contain; }
 }
 
 .intro {
   margin-bottom: 25px;
+  padding-inline: 20px;
   h1 {
     margin: 0;
     font-family: 'LeeSeoyun', 'Pretendard', sans-serif;
-    font-size: 36px;
+    font-size: clamp(24px, 6.5vw, 28px);
     font-weight: 400;
     line-height: 1.35;
     letter-spacing: 0;
@@ -138,7 +156,7 @@ button, textarea { font: inherit; }
     background: linear-gradient(120deg, #a4dde3, #83ced7);
     color: #245d64;
     border: 1px solid rgba(89, 190, 201, .10);
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     cursor: pointer;
     box-shadow: 0 8px 22px rgba(59,153,164,.12);
@@ -235,8 +253,8 @@ button, textarea { font: inherit; }
 
 .emotion-name {
   min-width: 0;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 300;
   color: #34585d;
   line-height: 1.4;
   word-break: keep-all;
@@ -289,7 +307,7 @@ button, textarea { font: inherit; }
   width: 100%;
   aspect-ratio: 1;
   padding: 0;
-  border: 1px solid rgba(255,255,255,.5);
+  border: 1px solid rgba(255,255,255,.16);
   border-radius: 50%;
   cursor: pointer;
   touch-action: manipulation;
@@ -298,32 +316,41 @@ button, textarea { font: inherit; }
   appearance: none;
 
   background:
-    radial-gradient(ellipse at 34% 22%, rgba(255,255,255,.42), rgba(255,255,255,.10) 42%, transparent 75%),
+    radial-gradient(ellipse at 36% 24%, rgba(255,255,255,.18), transparent 64%),
     var(--ball-gradient, linear-gradient(90deg, #59bec9, #59bec9));
 
   box-shadow:
-    inset 0 2px 12px rgba(255,255,255,.55),
-    inset 0 -4px 14px rgba(var(--ball-rgb),.05),
-    0 7px 22px rgba(var(--ball-rgb),.07),
-    0 0 30px rgba(var(--ball-rgb),.05);
+    inset 0 1px 10px rgba(255,255,255,.10),
+    inset 0 -2px 9px rgba(var(--ball-rgb),.035),
+    0 7px 22px rgba(var(--ball-rgb),.04),
+    0 0 30px rgba(var(--ball-rgb),.025);
+
+  // Surface reflections stay separate from the emotion color underneath.
+  &::before, &::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+  }
+  &::before {
+    inset: 1px;
+    border-radius: inherit;
+    background: radial-gradient(ellipse at 32% 18%, rgba(255,255,255,.48), rgba(255,255,255,.10) 26%, transparent 50%);
+    box-shadow: inset 0 1px 3px rgba(255,255,255,.10), inset 0 -1px 4px rgba(255,255,255,.04);
+  }
+  &::after {
+    top: 13%;
+    left: 19%;
+    width: 30%;
+    height: 11%;
+    border-radius: 50%;
+    transform: rotate(-32deg);
+    background: linear-gradient(180deg, rgba(255,255,255,.56), rgba(255,255,255,.16));
+    filter: blur(1.4px);
+  }
 
   transition: filter .3s, box-shadow .3s;
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 5%;
-    left: 11%;
-    width: 70%;
-    height: 45%;
-    border-radius: 50%;
-    background: radial-gradient(ellipse,
-      rgba(255,255,255,.30),
-      rgba(255,255,255,.08) 48%,
-      transparent 75%);
-    filter: blur(10px);
-    pointer-events: none;
-  }
+
 
 }
 
@@ -357,7 +384,7 @@ button, textarea { font: inherit; }
     grid-template-columns: 9px minmax(75px,1fr) minmax(55px,1.2fr) 34px;
     column-gap: 7px;
   }
-  .emotion-name { font-size: 12px; }
+  .emotion-name { font-size: 14px; }
   .ball-grid { gap: 10px !important; margin-bottom: 34px; }
 }
 
@@ -391,32 +418,32 @@ button, textarea { font: inherit; }
 .led-badge { flex-shrink: 0; padding: 6px 9px; border-radius: 20px; background: #dceff1; color: #34626a; font-size: 11px; font-weight: 700; }
 [data-state='sent'] .led-badge { background: #dff1e5; color: #28613d; }
 [data-state='error'] .led-badge { background: #ffe3dd; color: #9c3f2b; }
-.led-message { margin: 14px 0; font-size: 12px; line-height: 1.8; color: #46686e; }
+.led-message { margin: 14px 0; font-size: 15px; line-height: 1.8; color: #46686e; }
 .led-ranking { display: flex; flex-wrap: wrap; gap: 7px; list-style: none; padding: 0; margin: 0 0 18px; }
-.led-ranking li { display: flex; align-items: center; gap: 6px; padding: 6px 8px; background: white; border-radius: 10px; font-size: 11px; color: #3f6269; }
+.led-ranking li { display: flex; align-items: center; gap: 6px; padding: 6px 8px; background: white; border-radius: 10px; font-size: 13px; color: #3f6269; }
 .rank-color { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #0001; }
 .led-preview { display: grid; grid-template-columns: minmax(0,1fr); gap: 24px; padding: 22px 16px; background: #142e34; border-radius: 18px; }
 .led-column { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; min-width: 0; }
-.led-row-label, .led-speed { font-size: 10px; color: #d2e9ed; white-space: nowrap; }
+.led-row-label, .led-speed { font-size: 12px; color: #d2e9ed; white-space: nowrap; }
 .led-strip { display: flex; grid-column: 1 / -1; grid-row: 2; flex-direction: row; justify-content: space-between; align-items: center; gap: 3px; height: 25px; width: 100%; padding: 7px 6px; background: #294b52; border-radius: 6px; }
 .led-pixel { display: block; flex: 1 1 0; min-width: 0; max-width: 12px; height: 9px; border-radius: 3px; background: rgb(var(--pixel-rgb)); box-shadow: 0 0 7px rgba(var(--pixel-rgb), .35); }
 .led-preview-footer { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
-.led-preview-footer p { margin: 13px 0 5px; color: #55767b; font-size: 11px; line-height: 1.7; }
-.preview-toggle { border: 1px solid #bedfe4; background: white; color: #2f6570; padding: 8px 12px; border-radius: 10px; font-size: 12px; cursor: pointer; }
+.led-preview-footer p { margin: 13px 0 5px; color: #55767b; font-size: 14px; line-height: 1.7; }
+.preview-toggle { border: 1px solid #bedfe4; background: white; color: #2f6570; padding: 8px 12px; border-radius: 10px; font-size: 14px; cursor: pointer; }
 .preview-toggle:focus-visible { outline: 3px solid #23838f; outline-offset: 3px; }
 
-.ball-caption { margin: -14px 0 22px; color: #55767b; font-size: 12px; line-height: 1.7; }
+.ball-caption { margin: -14px 0 22px; color: #55767b; font-size: 15px; line-height: 1.7; }
 
 .emotion-ball {
-  transform-origin: center 65%;
-  &.squish { animation: ball-squish .55s ease-out; }
+  transform-origin: center;
+  &.squish { animation: ball-squish .8s cubic-bezier(.22, .61, .36, 1); }
   &:focus-visible { outline: 2px solid #23838f; outline-offset: 4px; }
 }
 @keyframes ball-squish {
   0%, 100% { transform: scale(1); }
-  22% { transform: scale(1.12, .84); }
-  46% { transform: scale(.93, 1.08); }
-  70% { transform: scale(1.04, .97); }
+  16% { transform: scale(1.055, .92); }
+  42% { transform: scale(1.035, .95); }
+  75% { transform: scale(1.008, .988); }
 }
 @media (prefers-reduced-motion: reduce) {
   .emotion-ball.squish { animation: none; }

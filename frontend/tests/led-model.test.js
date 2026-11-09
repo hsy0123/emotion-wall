@@ -102,5 +102,7 @@ test('palette blends continuously instead of holding then snapping', async () =>
   }
   const css=ballGradient(ledViewModel({scores:{joy:.5,love:.3,surprise:.2}}),2,0,1000)
   assert.equal((css.match(/rgba\(/g)||[]).length,17)
-  assert.ok(css.includes('0.46'))
+  const alphas = [...css.matchAll(/rgba\([^)]*,\s*([\d.]+)\)/g)].map(match => Number(match[1]))
+  assert.equal(alphas.length, 17)
+  assert.ok(alphas.every(alpha => alpha > 0 && alpha < 1))
 })

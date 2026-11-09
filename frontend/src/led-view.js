@@ -9,6 +9,7 @@ export function createLedView(root, onFrame = () => {}) {
     <div class="led-preview" aria-label="위, 가운데, 아래 세 줄의 빛 효과 예시">
       ${LED_LAYOUT.map(({ count: n, row, label }) => `<div class="led-column"><span class="led-row-label">${label}</span><div class="led-strip" data-row="${row}" aria-hidden="true">${Array.from({length:n}, () => '<i class="led-pixel"></i>').join('')}</div><span class="led-speed" data-row="${row}"></span></div>`).join('')}
     </div>
+    <p class="led-message">시간이 짧을수록 빠르게 움직여요.</p>
     <div class="led-preview-footer"><p id="ledPreviewNote"></p><button type="button" class="preview-toggle" aria-pressed="false">미리보기 멈추기</button></div>`
   const badge = root.querySelector('#ledBadge')
   const ranking = root.querySelector('#ledRanking'), note = root.querySelector('#ledPreviewNote')
@@ -60,7 +61,7 @@ export function createLedView(root, onFrame = () => {}) {
       if (!rankedEntries.length) {
         const li = document.createElement('li'); li.textContent = '뚜렷한 감정이 없어 기본색으로 표현해요.'; ranking.append(li)
       }
-      speedLabels.forEach(el => { const row = Number(el.dataset.row); el.textContent = `${model.estimated ? '예상 ' : ''}한 흐름에 ${((row ? model.period : model.leftPeriod)/1000).toFixed(2)}초` })
+      speedLabels.forEach(el => { const row = Number(el.dataset.row); el.textContent = `색상 이동 주기 · ${((row ? model.period : model.leftPeriod)/1000).toFixed(2)}초` })
       note.textContent = '화면은 빛의 움직임을 미리 보여주는 예시예요. 재생과 멈추기는 화면에만 적용됩니다.'
       paint(); sync()
     },

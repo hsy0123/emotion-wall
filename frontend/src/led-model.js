@@ -91,6 +91,6 @@ export function ballPixel(model, displayRow, columnPosition, elapsed) {
 
 export function ballGradient(model, displayRow, column, elapsed) {
   const stops = Array.from({length: 17}, (_, i) =>
-    `rgba(${ballPixel(model, displayRow, column + i / 16, elapsed).join(',')}, 0.46) ${i * 6.25}%`)
+    `rgba(${ballPixel(model, displayRow, column + i / 16, elapsed).join(',')}, 0.38) ${i * 6.25}%`)
   return `linear-gradient(90deg, ${stops.join(', ')})`
 }

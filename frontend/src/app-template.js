@@ -4,10 +4,9 @@ export const appTemplate = `
   <main class="emotion-app">
     <header class="app-header">
       <div class="brand">
-        <img class="brand-icon" src="${brandLogo}" alt="" width="44" height="44" aria-hidden="true">
+        <img class="brand-icon" src="${brandLogo}" alt="" width="32" height="32" aria-hidden="true">
         <div class="brand-name"><strong>말랑콜리</strong></div>
       </div>
-      <span class="menu-icon" aria-hidden="true">☰</span>
     </header>
     <section class="intro">
       <h1>오늘 당신의 감정을<br>분석해볼까요?</h1>
@@ -16,7 +15,7 @@ export const appTemplate = `
       <textarea
         id="emotionText"
         maxlength="500"
-        placeholder="오늘 기분이나 생각을 자유롭게 적어주세요..."
+        placeholder="오늘 기분이나 생각을 자유롭게 적어주세요."
         aria-label="감정 입력"
       ></textarea>
       <div class="char-count">
