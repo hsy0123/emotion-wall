@@ -2,16 +2,15 @@ import { ledViewModel, previewPixel, LABELS, LED_LAYOUT } from './led-model.js'
 
 export function createLedView(root, onFrame = () => {}) {
   root.innerHTML = `
-    <div class="led-heading"><div><span class="eyebrow">EMOTION IN LIGHT</span><h3>빛으로 보는 나의 감정</h3></div><span class="led-badge" id="ledBadge"></span></div>
+    <div class="led-heading"><h3>빛으로 보는 나의 감정</h3></div>
     <p class="led-message">가장 크게 느껴지는 감정과 그 곁의 감정들을 빛의 흐름으로 만나보세요.</p>
     <p class="led-message">감정의 강도에 따라 빛의 흐름도 달라져요.<br>격한 마음은 빠르게, 차분한 마음은 느리게 흐릅니다.</p>
     <ol class="led-ranking" id="ledRanking"></ol>
     <div class="led-preview" aria-label="위, 가운데, 아래 세 줄의 빛 효과 예시">
-      ${LED_LAYOUT.map(({ count: n, row, label }) => `<div class="led-column"><span class="led-row-label">${label}</span><div class="led-strip" data-row="${row}" aria-hidden="true">${Array.from({length:n}, () => '<i class="led-pixel"></i>').join('')}</div><span class="led-speed" data-row="${row}"></span></div>`).join('')}
+      ${LED_LAYOUT.map(({ count: n, row, label }) => `<div class="led-column" role="group" aria-label="${label} 빛 효과"><div class="led-strip" data-row="${row}" aria-hidden="true">${Array.from({length:n}, () => '<i class="led-pixel"></i>').join('')}</div><span class="led-speed" data-row="${row}"></span></div>`).join('')}
     </div>
     <p class="led-message">시간이 짧을수록 빠르게 움직여요.</p>
     <div class="led-preview-footer"><p id="ledPreviewNote"></p><button type="button" class="preview-toggle" aria-pressed="false">미리보기 멈추기</button></div>`
-  const badge = root.querySelector('#ledBadge')
   const ranking = root.querySelector('#ledRanking'), note = root.querySelector('#ledPreviewNote')
   const strips = [...root.querySelectorAll('.led-strip')].map(el => ({ row: Number(el.dataset.row), pixels: [...el.children] }))
   const speedLabels = [...root.querySelectorAll('.led-speed')]
@@ -50,7 +49,6 @@ export function createLedView(root, onFrame = () => {}) {
     update(data) {
       model = ledViewModel(data); elapsed = 0
       root.hidden = false; root.dataset.state = model.state
-      badge.textContent = model.state === 'sent' ? '전달 확인' : model.state === 'error' ? '전송 실패' : '빛 미리보기'
       const rankedEntries = model.names.map((name, index) => ({name, color: model.colors[index]}))
         .filter((item, index, items) => item.name !== 'neutral' && items.findIndex(other => other.name === item.name) === index)
       ranking.replaceChildren(...rankedEntries.map(({name, color}, i) => {

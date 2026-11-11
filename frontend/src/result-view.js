@@ -39,7 +39,7 @@ export function createResultView(root) {
         aria-label="${['맨 위', '가운데', '맨 아래'][Math.floor(index / 4)]} 줄 감정색 말랑이 ${index % 4 + 1} 눌러보기"></button>
     `).join('')
     balls = [...grid.children]
-    find('#resultDate').textContent = new Date().toLocaleString('ko-KR')
+    find('#resultDate').textContent = new Date().toLocaleString('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
   }
 
   function paintBalls(model, elapsed) {
