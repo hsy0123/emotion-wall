@@ -101,8 +101,27 @@ test('palette blends continuously instead of holding then snapping', async () =>
     assert.ok(a.every((v,ch)=>Math.abs(v-b[ch])<=2))
   }
   const css=ballGradient(ledViewModel({scores:{joy:.5,love:.3,surprise:.2}}),2,0,1000)
-  assert.equal((css.match(/rgba\(/g)||[]).length,17)
+  assert.equal((css.match(/rgba\(/g)||[]).length,33)
   const alphas = [...css.matchAll(/rgba\([^)]*,\s*([\d.]+)\)/g)].map(match => Number(match[1]))
-  assert.equal(alphas.length, 17)
+  assert.equal(alphas.length, 33)
   assert.ok(alphas.every(alpha => alpha > 0 && alpha < 1))
+})
+
+
+test('soft ball colors meet across adjacent balls and every loop join', async () => {
+  const {ballPixel, ballGradient, BALL_PERIOD_MS}=await import('../src/led-model.js')
+  const model=ledViewModel({scores:{sadness:.5,anger:.3,fear:.2}})
+  for (let time=0; time<=BALL_PERIOD_MS; time+=137) {
+    for(let column=0;column<3;column++) {
+      const left=[...ballGradient(model,2,column,time).matchAll(/rgba\(([^)]+)\)/g)].at(-1)[1]
+      const right=[...ballGradient(model,2,column+1,time).matchAll(/rgba\(([^)]+)\)/g)][0][1]
+      assert.equal(left,right)
+    }
+    const rgb=ballPixel(model,2,1.5,time)
+    assert.ok(rgb.every(value=>Number.isFinite(value) && value>=0 && value<=255))
+  }
+  for(const time of [0,4000,8000,12000]) {
+    const before=ballPixel(model,2,0,time-.1),after=ballPixel(model,2,0,time+.1)
+    assert.ok(before.every((value,ch)=>Math.abs(value-after[ch])<.1))
+  }
 })

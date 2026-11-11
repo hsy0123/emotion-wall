@@ -69,12 +69,23 @@ export const BALL_PERIOD_MS = 12000
 
 // Blend across the whole interval; no held colors or narrow transition bands.
 // RGB interpolation avoids traversing unrelated hues around the HSV color wheel.
-export function paletteColor(colors, position) {
+function interpolatePalette(colors, position) {
   const p = wrap(position) * 3, anchor = Math.floor(p)
   const fraction = p - anchor
   const t = smooth(fraction)
   const a = colors[anchor], b = colors[(anchor + 1) % 3]
-  return a.map((value, channel) => Math.round(value + (b[channel] - value) * t))
+  return a.map((value, channel) => value + (b[channel] - value) * t)
+}
+
+export function paletteColor(colors, position) {
+  return interpolatePalette(colors, position).map(Math.round)
+}
+
+// A wider blend softens the three-color joins without introducing extra hues.
+function softBallColor(colors, position) {
+  const samples = [-.065, 0, .065].map(offset => interpolatePalette(colors, position + offset))
+  return samples[1].map((value, channel) =>
+    Number(((samples[0][channel] + 2 * value + samples[2][channel]) / 4).toFixed(2)))
 }
 
 export function previewPixel(model, row, index, elapsed) {
@@ -86,11 +97,11 @@ export function previewPixel(model, row, index, elapsed) {
 // Their palette and row assignment still follow the actual emotion commands.
 export function ballPixel(model, displayRow, columnPosition, elapsed) {
   if (displayRow !== 2) return [...model.primary]
-  return paletteColor(model.colors, elapsed / BALL_PERIOD_MS - columnPosition / 4)
+  return softBallColor(model.colors, elapsed / BALL_PERIOD_MS - columnPosition / 4)
 }
 
 export function ballGradient(model, displayRow, column, elapsed) {
-  const stops = Array.from({length: 17}, (_, i) =>
-    `rgba(${ballPixel(model, displayRow, column + i / 16, elapsed).join(',')}, 0.38) ${i * 6.25}%`)
+  const stops = Array.from({length: 33}, (_, i) =>
+    `rgba(${ballPixel(model, displayRow, column + i / 32, elapsed).join(',')}, 0.38) ${i * 3.125}%`)
   return `linear-gradient(90deg, ${stops.join(', ')})`
 }
