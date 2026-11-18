@@ -17,8 +17,8 @@ RUN pip install --no-cache-dir --user torch --index-url https://download.pytorch
 
 COPY --chown=user . .
 
-# KOTE 모델을 이미지에 미리 받아 둬서 서버 시작을 빠르게 함
-RUN python -c "import json; from transformers import AutoTokenizer, AutoModelForSequenceClassification as M; m=json.load(open('kote_map.json'))['model_id']; AutoTokenizer.from_pretrained(m); M.from_pretrained(m)"
+# 한국어(KOTE)·영어(GoEmotions) 모델을 이미지에 미리 받아 둬서 서버 시작을 빠르게 함
+RUN python preload_models.py
 
 EXPOSE 7860
 CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "7860"]

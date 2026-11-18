@@ -9,7 +9,8 @@ KeywordAnalyzer는 스키마를 먼저 고정하기 위한 '더미(키워드 기
 사용:
     python analyzer.py "오늘 시험 망쳐서 너무 속상해"
     python analyzer.py                       # 데모 문장 실행
-    python analyzer.py --kote "문장"         # 실제 모델(KOTE) 사용, model_analyzer.py 참고
+    python analyzer.py --kote "문장"         # 실제 한국어 모델(KOTE) 사용, model_analyzer.py 참고
+    python analyzer.py --en "sentence"       # 실제 영어 모델(GoEmotions) 사용
 """
 import json
 import sys
@@ -91,9 +92,9 @@ def to_json(result, **kw):
 if __name__ == "__main__":
     args = sys.argv[1:]
     analyzer = None  # None이면 키워드 더미 분석기
-    if args and args[0] == "--kote":  # 실제 모델 (torch, transformers 필요)
-        from model_analyzer import KoteAnalyzer
-        analyzer = KoteAnalyzer()
+    if args and args[0] in ("--kote", "--en"):  # 실제 모델 (torch, transformers 필요)
+        import model_analyzer
+        analyzer = (model_analyzer.KoteAnalyzer if args[0] == "--kote" else model_analyzer.GoEmotionsAnalyzer)()
         args = args[1:]
     demos = args or [
         "오늘 시험 합격했어!! 진짜 너무 행복해",

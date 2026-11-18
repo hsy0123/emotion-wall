@@ -1,6 +1,7 @@
 """HTTP entry point: analyze text, plan the light effect, optionally send USB output."""
 import os
 from contextlib import asynccontextmanager
+from typing import Literal
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,12 +9,14 @@ from pydantic import BaseModel
 
 from analyzer import analyze_text
 from emotion_ranked import build_motion
+from language import resolve_language
 from led_controller import LedController
-from model_analyzer import KoteAnalyzer
+from model_analyzer import GoEmotionsAnalyzer, KoteAnalyzer
 
 # A cloud deployment leaves EMOTION_WALL_PORT unset and only returns analysis.
 led_output = LedController(os.environ.get("EMOTION_WALL_PORT"))
-kote_analyzer = KoteAnalyzer()
+# One model per input language; both map their emotions onto the same 7 labels.
+analyzers = {"ko": KoteAnalyzer(), "en": GoEmotionsAnalyzer()}
 
 
 @asynccontextmanager
@@ -46,6 +49,8 @@ app.add_middleware(
 
 class EmotionRequest(BaseModel):
     text: str
+    # "auto" picks the model from the text; "ko"/"en" force one.
+    language: Literal["auto", "ko", "en"] = "auto"
 
 
 @app.get("/")
@@ -55,7 +60,8 @@ def home():
 
 @app.post("/analyze")
 def analyze_emotion(request: EmotionRequest):
-    result = analyze_text(request.text, analyzer=kote_analyzer)
+    language = resolve_language(request.language, request.text)
+    result = analyze_text(request.text, analyzer=analyzers[language])
     motion = build_motion(result["scores"], result.get("intensity"))
     return {
         "led": led_output.display(motion),
@@ -64,4 +70,5 @@ def analyze_emotion(request: EmotionRequest):
         # Preserve the response keys consumed by existing deployed frontends.
         "emotions": result["scores"],
         "main_emotion": result["dominant"],
+        "language": language,
     }
