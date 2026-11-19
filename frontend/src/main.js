@@ -8,6 +8,7 @@ const app = document.querySelector('#app')
 app.innerHTML = appTemplate
 const textarea = app.querySelector('#emotionText')
 const button = app.querySelector('#submitButton')
+const languageSelect = app.querySelector('#analysisLanguage')
 const errorMessage = app.querySelector('#analysisError')
 const results = createResultView(app)
 const lights = createLedView(app.querySelector('#ledSection'), results.paintBalls)
@@ -26,10 +27,11 @@ button.addEventListener('click', async () => {
   errorMessage.hidden = true
   lights.pending()
   button.disabled = true
+  languageSelect.disabled = true
   button.setAttribute('aria-busy', 'true')
   button.innerHTML = '<span class="loading-spinner" aria-hidden="true"></span><span>감정을 분석하고 있어요...</span>'
   try {
-    const data = await analyzeText(text)
+    const data = await analyzeText(text, { language: languageSelect.value })
     results.render(data)
     lights.update(data)
     results.show()
@@ -41,6 +43,7 @@ button.addEventListener('click', async () => {
     errorMessage.hidden = false
   } finally {
     button.disabled = false
+    languageSelect.disabled = false
     button.textContent = '감정 분석하기'
     button.removeAttribute('aria-busy')
   }

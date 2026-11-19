@@ -444,3 +444,25 @@ button, textarea { font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .emotion-ball.squish { animation: none; }
 }
+
+.language-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-size: 15px;
+  label { color: #46686e; }
+  select {
+    font: inherit;
+    color: #245d64;
+    background: #f5fbfc;
+    border: 1px solid #d4e9ec;
+    border-radius: 10px;
+    padding: 7px 12px;
+    min-height: 40px;
+    &:focus-visible { outline: 2px solid #23838f; outline-offset: 2px; }
+    &:disabled { opacity: .6; }
+  }
+}
+.result-meta { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 10px; text-align: right; }

@@ -12,10 +12,18 @@ export const appTemplate = `
       <h1>오늘 당신의 감정을<br>분석해볼까요?</h1>
     </section>
     <section class="input-section">
+      <div class="language-control">
+        <label for="analysisLanguage">입력 언어</label>
+        <select id="analysisLanguage">
+          <option value="auto">자동 감지</option>
+          <option value="ko">한국어</option>
+          <option value="en">English</option>
+        </select>
+      </div>
       <textarea
         id="emotionText"
         maxlength="500"
-        placeholder="오늘 기분이나 생각을 자유롭게 적어주세요."
+        placeholder="한국어나 영어로 오늘의 마음을 적어주세요."
         aria-label="감정 입력"
       ></textarea>
       <div class="char-count">
@@ -29,7 +37,7 @@ export const appTemplate = `
     <section id="resultSection" class="result-section" hidden>
       <div class="result-header">
         <h2>분석 결과</h2>
-        <span id="resultDate"></span>
+        <div class="result-meta"><span id="resultLanguage" hidden></span><span id="resultDate"></span></div>
       </div>
       <div class="result-content">
         <div class="donut-wrapper">
