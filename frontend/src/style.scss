@@ -445,24 +445,30 @@ button, textarea { font: inherit; }
   .emotion-ball.squish { animation: none; }
 }
 
-.language-control {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
-  font-size: 15px;
-  label { color: #46686e; }
+ .language-control {
+  flex-shrink: 0;
   select {
+    appearance: none;
     font: inherit;
+    font-size: 15px;
     color: #245d64;
-    background: #f5fbfc;
+    background: #f5fbfc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='10' viewBox='0 0 14 10'%3E%3Cpath d='m2 2 5 5 5-5' fill='none' stroke='%23245d64' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 14px center;
     border: 1px solid #d4e9ec;
-    border-radius: 10px;
-    padding: 7px 12px;
+    border-radius: 12px;
+    padding: 9px 38px 9px 14px;
     min-height: 40px;
     &:focus-visible { outline: 2px solid #23838f; outline-offset: 2px; }
     &:disabled { opacity: .6; }
   }
+}
+html[lang="en"] {
+  .brand-name strong { font-size: clamp(20px, 5.3vw, 26px); }
+  .intro h1 { line-height: 1.4; }
+  .emotion-name { overflow-wrap: anywhere; }
+}
+@media (max-width: 380px) {
+  .app-header { padding-inline: 0; gap: 8px; }
+  .app-header .brand { gap: 6px; }
+  .language-control select { padding-left: 10px; padding-right: 32px; background-position: right 10px center; }
 }
 .result-meta { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 10px; text-align: right; }

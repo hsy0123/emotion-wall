@@ -42,6 +42,7 @@ export function createResultView(root) {
     const languageLabel = { ko: '한국어로 분석', en: '영어로 분석' }[data.language]
     find('#resultLanguage').hidden = !languageLabel
     find('#resultLanguage').textContent = languageLabel ?? ''
+    find('#resultDate').dataset.timestamp = Date.now()
     find('#resultDate').textContent = new Date().toLocaleString('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
   }
 

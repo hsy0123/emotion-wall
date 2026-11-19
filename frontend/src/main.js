@@ -1,3 +1,4 @@
+import { getLanguage, setLanguage, translate, localize } from './i18n.js'
 import './style.scss'
 import { appTemplate } from './app-template.js'
 import { analyzeText } from './api-client.js'
@@ -13,6 +14,19 @@ const errorMessage = app.querySelector('#analysisError')
 const results = createResultView(app)
 const lights = createLedView(app.querySelector('#ledSection'), results.paintBalls)
 
+languageSelect.value = getLanguage()
+localize(app)
+languageSelect.addEventListener('change', () => {
+  setLanguage(languageSelect.value)
+  textarea.value = ''
+  app.querySelector('#count').textContent = '0'
+  app.querySelector('#resultSection').hidden = true
+  lights.pending()
+  document.documentElement.style.removeProperty('--emotion-glow')
+  errorMessage.hidden = true
+  localize(app)
+})
+
 textarea.addEventListener('input', () => {
   app.querySelector('#count').textContent = textarea.value.length
 })
@@ -20,7 +34,7 @@ textarea.addEventListener('input', () => {
 button.addEventListener('click', async () => {
   const text = textarea.value.trim()
   if (!text) {
-    alert('감정을 표현하는 문장을 입력해 주세요.')
+    alert(translate('감정을 표현하는 문장을 입력해 주세요.'))
     textarea.focus()
     return
   }
@@ -30,10 +44,12 @@ button.addEventListener('click', async () => {
   languageSelect.disabled = true
   button.setAttribute('aria-busy', 'true')
   button.innerHTML = '<span class="loading-spinner" aria-hidden="true"></span><span>감정을 분석하고 있어요...</span>'
+  localize(app)
   try {
     const data = await analyzeText(text, { language: languageSelect.value })
     results.render(data)
     lights.update(data)
+    localize(app)
     results.show()
   } catch (error) {
     console.error(error)
@@ -46,5 +62,6 @@ button.addEventListener('click', async () => {
     languageSelect.disabled = false
     button.textContent = '감정 분석하기'
     button.removeAttribute('aria-busy')
+    localize(app)
   }
 })

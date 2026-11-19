@@ -74,10 +74,9 @@ npm --prefix frontend run build
 
 ## 한국어와 영어 입력
 
-입력 언어 선택은 기본적으로 자동 감지이며, 한국어 또는 English로 직접 지정할 수 있습니다.
-프론트엔드는 `/analyze`에 `{"text":"I feel happy", "language":"auto"}` 형태로 요청하고,
-응답의 `language`가 `ko` 또는 `en`이면 결과에 분석 언어를 표시합니다.
-화면 문구 전체의 영문 번역과는 별개인 입력 언어 지원입니다.
+사이트 오른쪽 상단에서 한국어 또는 English를 선택하면 로고, 안내, 결과, 접근성 문구와 날짜 표기가 함께 전환됩니다.
+선택은 브라우저에 저장되며 `/analyze`에 `{"text":"I feel happy", "language":"en"}`처럼 동일한 분석 언어를 전달합니다.
+응답의 `language`가 `ko` 또는 `en`이면 결과에 실제 분석 언어를 표시합니다. 자동 감지는 화면에서 제공하지 않습니다.
 
 현재 한·영 API: `https://yebeen23-emotion-wall-api.hf.space`.
 Vercel에 `VITE_API_URL`이 이미 설정되어 있다면 이 주소로 변경하고 재배포해야 합니다.

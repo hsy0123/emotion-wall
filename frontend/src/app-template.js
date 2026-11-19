@@ -7,23 +7,21 @@ export const appTemplate = `
         <img class="brand-icon" src="${brandLogo}" alt="" width="32" height="32" aria-hidden="true">
         <div class="brand-name"><strong>말랑콜리</strong></div>
       </div>
+      <div class="language-control">
+        <select id="analysisLanguage" aria-label="언어 설정">
+          <option value="ko">한국어</option>
+          <option value="en">English</option>
+        </select>
+      </div>
     </header>
     <section class="intro">
       <h1>오늘 당신의 감정을<br>분석해볼까요?</h1>
     </section>
     <section class="input-section">
-      <div class="language-control">
-        <label for="analysisLanguage">입력 언어</label>
-        <select id="analysisLanguage">
-          <option value="auto">자동 감지</option>
-          <option value="ko">한국어</option>
-          <option value="en">English</option>
-        </select>
-      </div>
       <textarea
         id="emotionText"
         maxlength="500"
-        placeholder="한국어나 영어로 오늘의 마음을 적어주세요."
+        placeholder="오늘의 마음을 자유롭게 적어주세요."
         aria-label="감정 입력"
       ></textarea>
       <div class="char-count">
