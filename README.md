@@ -47,7 +47,7 @@ npm run dev
 
 | 변수 | 설정 위치 | 용도 |
 |---|---|---|
-| `VITE_API_URL` | 프론트엔드 빌드 환경 | 공개 백엔드 주소. 기본값 `http://127.0.0.1:8000` |
+| `VITE_API_URL` | 프론트엔드 빌드 환경 | 공개 백엔드 주소. 개발 기본값 `http://127.0.0.1:8000`, 배포 기본값 `https://yebeen23-emotion-wall-api.hf.space` |
 | `ALLOWED_ORIGINS` | 백엔드 실행 환경 | 접근할 웹 origin을 쉼표로 구분. 예: `https://your-site.example` |
 | `EMOTION_WALL_PORT` | ESP32를 연결한 컴퓨터 | 실제 USB 포트. **클라우드에서는 미설정** |
 
@@ -99,3 +99,20 @@ npm --prefix frontend run build
 백업 폴더·가상환경·모델 캐시·`.env`·빌드 결과는 Git에 포함하지 않습니다.
 
 
+## 한국어와 영어 입력
+
+사이트 오른쪽 상단에서 한국어 또는 English를 선택하면 로고, 안내, 결과, 접근성 문구와 날짜 표기가 함께 전환됩니다.
+선택은 브라우저에 저장되며 `/analyze`에 `{"text":"I feel happy", "language":"en"}`처럼 동일한 분석 언어를 전달합니다.
+응답의 `language`가 `ko` 또는 `en`이면 결과에 실제 분석 언어를 표시합니다. 자동 감지는 화면에서 제공하지 않습니다.
+
+현재 한·영 API: `https://yebeen23-emotion-wall-api.hf.space`.
+Vercel에 `VITE_API_URL`이 이미 설정되어 있다면 이 주소로 변경하고 재배포해야 합니다.
+로컬에서도 영어 분석을 확인하려면 아래처럼 실행합니다.
+
+```sh
+cd frontend
+VITE_API_URL=https://yebeen23-emotion-wall-api.hf.space npm run dev
+```
+
+로컬 USB LED를 사용할 때는 한·영 백엔드 변경이 포함된 로컬 서버를 실행하고
+`VITE_API_URL=http://127.0.0.1:8000`을 사용합니다. 클라우드 API는 노트북 USB를 제어하지 않습니다.

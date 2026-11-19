@@ -22,10 +22,27 @@ test('API client keeps request contract, HTTP errors and abort timeout', async (
   }})
   assert.ok(observed.url.endsWith('/analyze'))
   assert.equal(observed.init.method,'POST')
-  assert.deepEqual(JSON.parse(observed.init.body),{text:'hello'})
+  assert.deepEqual(JSON.parse(observed.init.body),{text:'hello',language:'auto'})
   assert.equal(data.scores.joy,1)
   await assert.rejects(analyzeText('test',{fetchImpl:async()=>({ok:false,status:500})}),/500/)
   await assert.rejects(analyzeText('test',{timeoutMs:5,fetchImpl:(_,init)=>new Promise((resolve,reject)=>{
     init.signal.addEventListener('abort',()=>reject(new DOMException('timeout','AbortError')))
   })}),{name:'AbortError'})
+})
+
+
+test('language selection is sent unchanged and detected language is preserved', async () => {
+  for (const language of ['auto','ko','en']) {
+    let body
+    const result=await analyzeText('I feel happy',{language,fetchImpl:async (_,init)=>{
+      body=JSON.parse(init.body)
+      return {ok:true,json:async()=>({language:'en',scores:{joy:1},dominant:'joy'})}
+    }})
+    assert.equal(body.language,language)
+    assert.equal(result.language,'en')
+    assert.equal(chartModel(result).main.key,'joy')
+  }
+  let called=false
+  await assert.rejects(analyzeText('test',{language:'fr',fetchImpl:async()=>{called=true}}),/지원하지 않는/)
+  assert.equal(called,false)
 })
