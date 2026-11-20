@@ -1,3 +1,4 @@
+import { localize } from './i18n.js'
 import { ledViewModel, previewPixel, LABELS, LED_LAYOUT } from './led-model.js'
 
 export function createLedView(root, onFrame = () => {}) {
@@ -36,6 +37,7 @@ export function createLedView(root, onFrame = () => {}) {
     cancelAnimationFrame(frame); lastTime = null
     toggle.textContent = paused ? '미리보기 재생' : '미리보기 멈추기'
     toggle.setAttribute('aria-pressed', String(paused))
+    localize(root)
     if (model && !paused && !document.hidden) frame = requestAnimationFrame(tick)
   }
   toggle.addEventListener('click', () => { paused = !paused; sync() })

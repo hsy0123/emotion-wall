@@ -1,20 +1,28 @@
-"""model_analyzer.py - 실제 한국어 감정 모델(KOTE) 분석기
+"""model_analyzer.py - 실제 감정 분석 모델 분석기 (한국어 KOTE / 영어 GoEmotions)
 
-KOTE(KcELECTRA 기반, 44개 감정 다중 라벨)의 출력을 우리 7개 레이블로 집계합니다.
-analyzer.py의 인터페이스(analyze(text) -> (scores, intensity))를 그대로 따르므로
+Hugging Face 감정 모델의 출력을 우리 7개 레이블(joy, love, surprise, sadness, anger, fear, neutral)로
+집계합니다. analyzer.py의 인터페이스(analyze(text) -> (scores, intensity))를 그대로 따르므로
 기존 파이프라인(mapper, 웹 JSON 스키마)은 변경 없이 동작합니다.
+
+  언어  클래스               모델                                 매핑 파일            원본 감정
+  ko    KoteAnalyzer         searle-j/kote_for_easygoing_people   kote_map.json        44개
+  en    GoEmotionsAnalyzer   SamLowe/roberta-base-go_emotions     goemotions_map.json  28개
 
 필요 패키지: pip install torch transformers   (requirements.txt 참고)
 
 사용:
     from analyzer import analyze_text
-    from model_analyzer import KoteAnalyzer
+    from model_analyzer import GoEmotionsAnalyzer, KoteAnalyzer
     result = analyze_text("오늘 시험 망쳐서 너무 속상해", analyzer=KoteAnalyzer())
+    result = analyze_text("I failed my exam and feel so sad", analyzer=GoEmotionsAnalyzer())
 
     python analyzer.py --kote "오늘 시험 망쳐서 너무 속상해"
+    python analyzer.py --en "I failed my exam and feel so sad"
+
+모델/매핑/확률 변환 방식은 *_map.json에 있어서, 새 언어를 추가할 때는 매핑 파일 + 얇은 하위 클래스만 만들면 됩니다.
 
 집계 방식 (aggregate_probs)
-  1) KOTE는 감정별 독립 시그모이드 확률(합이 1이 아님)을 냅니다.
+  1) 모델은 감정별 독립 시그모이드 확률(합이 1이 아님)을 냅니다.
   2) min_prob 미만은 노이즈로 보고 버립니다.
   3) 7개 감정 각각에 대해 매핑된 레이블의 (가중치 x 확률) 중 최댓값(agg="max")을 사용합니다.
      합산("sum")은 레이블 수가 많은 감정(분노 등)에 유리해져서 기본값으로 쓰지 않습니다.
@@ -22,12 +30,15 @@ analyzer.py의 인터페이스(analyze(text) -> (scores, intensity))를 그대�
   5) intensity는 neutral을 제외한 감정의 최대 강도로 정합니다 (0.35~1.0).
 """
 import json
+import math
 import re
 from pathlib import Path
 
 from mapper import load_palette
 
-MAP_PATH = Path(__file__).with_name("kote_map.json")
+KOTE_MAP_PATH = Path(__file__).with_name("kote_map.json")
+GOEMOTIONS_MAP_PATH = Path(__file__).with_name("goemotions_map.json")
+MAP_PATH = KOTE_MAP_PATH  # 기존 코드 호환용 이름
 
 # HF config의 id2label이 LABEL_0... 형태일 때만 쓰는 대비용 목록 (Spark NLP 이식본 기준 순서, 미검증).
 FALLBACK_LABELS = [
@@ -39,14 +50,28 @@ FALLBACK_LABELS = [
     "감동/감탄", "아껴주는", "존경", "서러움",
 ]
 
+ACTIVATIONS = ("sigmoid", "softmax")
+
 
 def load_mapping(path=MAP_PATH):
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 
+def probabilities_from_logits(logits, activation="sigmoid"):
+    """모델 로짓 리스트 -> 확률 리스트. torch 없이 테스트할 수 있는 순수 함수."""
+    if activation == "sigmoid":
+        return [1 / (1 + math.exp(-x)) if x >= 0 else math.exp(x) / (1 + math.exp(x)) for x in logits]
+    if activation == "softmax":
+        top = max(logits)
+        exps = [math.exp(x - top) for x in logits]
+        total = sum(exps)
+        return [e / total for e in exps]
+    raise ValueError(f"지원하지 않는 activation: {activation} (sigmoid 또는 softmax)")
+
+
 def aggregate_probs(probs, mapping, emotions, agg="max", min_prob=0.1):
-    """KOTE 라벨 확률 dict -> (7개 감정 scores(합=1), intensity). torch 없이 테스트 가능한 순수 함수."""
+    """모델 라벨 확률 dict -> (7개 감정 scores(합=1), intensity). torch 없이 테스트 가능한 순수 함수."""
     parts = {e: [] for e in emotions}
     for label, p in probs.items():
         if p < min_prob:
@@ -77,20 +102,31 @@ def aggregate_probs(probs, mapping, emotions, agg="max", min_prob=0.1):
     return scores, intensity
 
 
-class KoteAnalyzer:
-    def __init__(self, model_id=None, mapping_path=MAP_PATH, palette=None, device=None,
-                 agg="max", min_prob=0.1, max_length=256):
+class EmotionClassifier:
+    """Hugging Face 시퀀스 분류 모델 -> 7개 감정. 모델/매핑/활성화 함수는 매핑 JSON에서 읽습니다."""
+
+    default_map_path = None
+    fallback_labels = None  # config에 레이블 이름이 없을 때만 쓰는 대비용 목록
+
+    def __init__(self, model_id=None, mapping_path=None, palette=None, device=None,
+                 agg="max", min_prob=None, max_length=256):
         try:
             import torch
             from transformers import AutoModelForSequenceClassification, AutoTokenizer
         except ImportError as e:  # pragma: no cover
-            raise ImportError("KoteAnalyzer에는 torch, transformers가 필요합니다: pip install torch transformers") from e
+            raise ImportError("감정 모델에는 torch, transformers가 필요합니다: pip install torch transformers") from e
 
-        cfg = load_mapping(mapping_path)
+        self.map_path = Path(mapping_path or self.default_map_path)
+        cfg = load_mapping(self.map_path)
+        self.language = cfg.get("language")
+        self.activation = cfg.get("activation", "sigmoid")
+        if self.activation not in ACTIVATIONS:
+            raise ValueError(f"{self.map_path.name}: activation은 {ACTIVATIONS} 중 하나여야 합니다.")
         self.mapping = cfg["labels"]
         self.model_id = model_id or cfg["model_id"]
+        self.min_prob = cfg.get("min_prob", 0.1) if min_prob is None else min_prob
         self.emotions = list((palette or load_palette())["emotions"].keys())
-        self.agg, self.min_prob, self.max_length = agg, min_prob, max_length
+        self.agg, self.max_length = agg, max_length
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
         self.tok = AutoTokenizer.from_pretrained(self.model_id)
@@ -102,31 +138,44 @@ class KoteAnalyzer:
         id2label = self.model.config.id2label
         labels = [str(id2label[i]) for i in range(len(id2label))]
         if all(re.fullmatch(r"LABEL_\d+", name) for name in labels):
-            if len(labels) != len(FALLBACK_LABELS):
-                raise RuntimeError("모델 레이블 수가 44개가 아니라서 대체 목록을 쓸 수 없습니다.")
+            if not self.fallback_labels or len(labels) != len(self.fallback_labels):
+                raise RuntimeError(f"{self.model_id}: 모델 config에 레이블 이름이 없고 쓸 수 있는 대체 목록도 없습니다.")
             print("[경고] 모델 config에 레이블 이름이 없어 대체 목록(순서 미검증)을 사용합니다. "
                   "결과가 이상하면 모델 카드의 레이블 순서와 대조하세요.")
-            return FALLBACK_LABELS
+            return self.fallback_labels
         return labels
 
     def _check_mapping(self):
         unmapped = [name for name in self.labels if name not in self.mapping]
         if unmapped:
-            print(f"[경고] kote_map.json에 없는 레이블 {len(unmapped)}개는 무시됩니다: {unmapped}")
+            print(f"[경고] {self.map_path.name}에 없는 레이블 {len(unmapped)}개는 무시됩니다: {unmapped}")
         unknown = [e for m in self.mapping.values() for e in m if e not in self.emotions]
         if unknown:
-            raise ValueError(f"kote_map.json이 palette.json에 없는 감정을 참조합니다: {sorted(set(unknown))}")
+            raise ValueError(f"{self.map_path.name}이 palette.json에 없는 감정을 참조합니다: {sorted(set(unknown))}")
 
     def predict_probs(self, text):
-        """KOTE 44개 라벨별 시그모이드 확률."""
+        """모델 라벨별 확률 (activation에 따라 sigmoid 또는 softmax)."""
         import torch
         enc = self.tok(text, return_tensors="pt", truncation=True, max_length=self.max_length)
         enc = {k: v.to(self.device) for k, v in enc.items()}
         with torch.no_grad():
-            logits = self.model(**enc).logits[0]
-        return {name: p for name, p in zip(self.labels, torch.sigmoid(logits).tolist())}
+            logits = self.model(**enc).logits[0].tolist()
+        return dict(zip(self.labels, probabilities_from_logits(logits, self.activation)))
 
     def analyze(self, text):
         if not text.strip():
             return aggregate_probs({}, self.mapping, self.emotions)
         return aggregate_probs(self.predict_probs(text), self.mapping, self.emotions, self.agg, self.min_prob)
+
+
+class KoteAnalyzer(EmotionClassifier):
+    """한국어: KOTE(KcELECTRA 기반, 44개 감정 다중 라벨)."""
+
+    default_map_path = KOTE_MAP_PATH
+    fallback_labels = FALLBACK_LABELS
+
+
+class GoEmotionsAnalyzer(EmotionClassifier):
+    """영어: GoEmotions(RoBERTa 기반, 28개 감정 다중 라벨)."""
+
+    default_map_path = GOEMOTIONS_MAP_PATH

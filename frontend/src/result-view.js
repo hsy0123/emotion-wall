@@ -39,6 +39,10 @@ export function createResultView(root) {
         aria-label="${['맨 위', '가운데', '맨 아래'][Math.floor(index / 4)]} 줄 감정색 말랑이 ${index % 4 + 1} 눌러보기"></button>
     `).join('')
     balls = [...grid.children]
+    const languageLabel = { ko: '한국어로 분석', en: '영어로 분석' }[data.language]
+    find('#resultLanguage').hidden = !languageLabel
+    find('#resultLanguage').textContent = languageLabel ?? ''
+    find('#resultDate').dataset.timestamp = Date.now()
     find('#resultDate').textContent = new Date().toLocaleString('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
   }
 

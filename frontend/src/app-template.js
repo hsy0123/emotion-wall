@@ -7,6 +7,12 @@ export const appTemplate = `
         <img class="brand-icon" src="${brandLogo}" alt="" width="32" height="32" aria-hidden="true">
         <div class="brand-name"><strong>말랑콜리</strong></div>
       </div>
+      <div class="language-control">
+        <select id="analysisLanguage" aria-label="언어 설정">
+          <option value="ko">한국어</option>
+          <option value="en">English</option>
+        </select>
+      </div>
     </header>
     <section class="intro">
       <h1>오늘 당신의 감정을<br>분석해볼까요?</h1>
@@ -15,7 +21,7 @@ export const appTemplate = `
       <textarea
         id="emotionText"
         maxlength="500"
-        placeholder="오늘 기분이나 생각을 자유롭게 적어주세요."
+        placeholder="오늘의 마음을 자유롭게 적어주세요."
         aria-label="감정 입력"
       ></textarea>
       <div class="char-count">
@@ -29,7 +35,7 @@ export const appTemplate = `
     <section id="resultSection" class="result-section" hidden>
       <div class="result-header">
         <h2>분석 결과</h2>
-        <span id="resultDate"></span>
+        <div class="result-meta"><span id="resultLanguage" hidden></span><span id="resultDate"></span></div>
       </div>
       <div class="result-content">
         <div class="donut-wrapper">

@@ -1,5 +1,8 @@
 {
   "model_id": "searle-j/kote_for_easygoing_people",
+  "language": "ko",
+  "activation": "sigmoid",
+  "min_prob": 0.1,
   "_comment": "KOTE 44개 레이블 -> 7개 감정 매핑. 값은 {감정: 가중치}. 한 레이블이 여러 감정에 걸칠 수 있음. 코드 수정 없이 이 파일만 고치면 됩니다.",
   "labels": {
     "기쁨":              {"joy": 1.0},

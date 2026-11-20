@@ -3,7 +3,7 @@
 문장을 입력하면 감정 비율을 분석하고, 색과 움직임으로 표현하는 웹 프로젝트입니다.
 ESP32를 USB로 연결하면 같은 분석 결과를 실제 RGBW LED에도 보낼 수 있습니다.
 
-**흐름:** 문장 입력 → KOTE 감정 분석 → 감정색·속도 계산 → 웹 미리보기 / 선택적 USB LED 출력
+**흐름:** 문장 입력 → 언어 판별 → 감정 분석(한국어 KOTE / 영어 GoEmotions) → 감정색·속도 계산 → 웹 미리보기 / 선택적 USB LED 출력
 
 ## 처음 볼 파일
 
@@ -16,6 +16,7 @@ ESP32를 USB로 연결하면 같은 분석 결과를 실제 RGBW LED에도 보�
 | 화면 스타일 | `frontend/src/style.scss` |
 | HTTP API의 시작과 응답 | `api.py` |
 | 감정 분석 파이프라인 / 실제 AI 모델 | `analyzer.py` / `model_analyzer.py` |
+| 한국어·영어 판별 / 모델별 감정 매핑 | `language.py` / `kote_map.json`, `goemotions_map.json` |
 | LED 대표색 / 속도 / 상위 감정 선택 | `color_mapper.py` / `emotion_motion.py` / `emotion_ranked.py` |
 | USB 연결 관리 / 통신 명령 | `led_controller.py` / `serial_sender.py` |
 
@@ -46,15 +47,39 @@ npm run dev
 
 | 변수 | 설정 위치 | 용도 |
 |---|---|---|
-| `VITE_API_URL` | 프론트엔드 빌드 환경 | 공개 백엔드 주소. 기본값 `http://127.0.0.1:8000` |
+| `VITE_API_URL` | 프론트엔드 빌드 환경 | 공개 백엔드 주소. 개발 기본값 `http://127.0.0.1:8000`, 배포 기본값 `https://yebeen23-emotion-wall-api.hf.space` |
 | `ALLOWED_ORIGINS` | 백엔드 실행 환경 | 접근할 웹 origin을 쉼표로 구분. 예: `https://your-site.example` |
 | `EMOTION_WALL_PORT` | ESP32를 연결한 컴퓨터 | 실제 USB 포트. **클라우드에서는 미설정** |
 
 웹 배포 빌드는 `cd frontend && npm run build`입니다. `VITE_API_URL` 변경 후에는 다시 빌드합니다.
 백엔드 Dockerfile은 Hugging Face Spaces용 7860 포트를 유지합니다.
 API는 `GET /`, `POST /analyze`를 제공하며 `/docs`에서 요청·응답 형식을 확인할 수 있습니다.
-`POST /analyze` 요청 예: `{"text":"오늘 정말 행복해"}`.
-응답의 `scores`는 감정 비율, `motion`은 표현 계획, `led`는 실제 USB 전송 결과입니다.
+`POST /analyze` 요청 예: `{"text":"오늘 정말 행복해"}`, `{"text":"I feel so happy today"}`.
+응답의 `scores`는 감정 비율, `motion`은 표현 계획, `led`는 실제 USB 전송 결과, `language`는 사용한 모델의 언어(`ko`/`en`)입니다.
+
+## 영어 지원
+
+입력에 한글이 많으면 한국어 모델(KOTE), 영어가 많으면 영어 모델([GoEmotions](https://huggingface.co/SamLowe/roberta-base-go_emotions))이 분석합니다.
+두 모델의 감정은 같은 7개(`joy, love, surprise, sadness, anger, fear, neutral`)로 모이므로 색·속도·LED 코드와 웹 화면은 그대로입니다.
+
+- 요청에 `"language": "auto" | "ko" | "en"`을 넣으면 모델을 직접 고를 수 있습니다. 생략하면 `auto`라서 기존 프론트는 수정 없이 동작합니다.
+- 한글·영어 단어 수를 비교하며, 같으면 한국어로 처리합니다. 글자가 없는 입력(이모지·숫자)도 한국어입니다.
+- 영어 감정 28개 → 7개 매핑은 `goemotions_map.json`에서 고칩니다. 한국어와 같은 기준이며 코드 수정은 필요 없습니다.
+- 백엔드 이미지는 두 모델을 빌드할 때 미리 받아 둡니다(`preload_models.py`). 영어 모델이 추가되어 메모리를 더 씁니다.
+- 로컬에서는 `python analyzer.py --en "I feel so happy today"`로 영어 모델만 확인할 수 있습니다.
+
+### 언어 버튼 (LAN | ENG | KOR)
+
+화면 오른쪽 위 버튼으로 영어판/한국어판을 따로 돌릴 수 있습니다. 선택은 브라우저에 저장됩니다.
+
+| 버튼 | 화면 문구 | 분석 모델 (`language`) |
+| --- | --- | --- |
+| LAN | 브라우저 언어 (한국어 아니면 영어) | 문장을 보고 서버가 자동 선택 (`auto`) |
+| ENG | 영어 | 영어 모델 고정 (`en`) |
+| KOR | 한국어 | 한국어 모델 고정 (`ko`) |
+
+- 문구는 `frontend/src/i18n.js` 한 파일에 ko/en 사전으로 모여 있습니다. 새 문구는 두 언어에 같은 키로 추가하세요(`tests/i18n.test.js`가 키·치환 자리 불일치를 잡습니다).
+- 결과가 나온 뒤 버튼을 눌러도 다시 분석하지 않고 화면만 새 언어로 바뀝니다. 모델을 바꿔 다시 분석하려면 버튼을 고른 뒤 다시 "분석하기"를 누르세요.
 
 ## LED와 미리보기
 
@@ -70,6 +95,24 @@ npm --prefix frontend run build
 ```
 
 검사는 모델·실제 보드 없이 실행합니다. 실제 모델 추론과 보드 발광은 별도로 확인합니다.
+실제 한국어·영어 모델 결과는 `python scripts/check_models.py`로 문장 쌍을 비교해 볼 수 있습니다(모델 다운로드 필요).
 백업 폴더·가상환경·모델 캐시·`.env`·빌드 결과는 Git에 포함하지 않습니다.
 
 
+## 한국어와 영어 입력
+
+사이트 오른쪽 상단에서 한국어 또는 English를 선택하면 로고, 안내, 결과, 접근성 문구와 날짜 표기가 함께 전환됩니다.
+선택은 브라우저에 저장되며 `/analyze`에 `{"text":"I feel happy", "language":"en"}`처럼 동일한 분석 언어를 전달합니다.
+응답의 `language`가 `ko` 또는 `en`이면 결과에 실제 분석 언어를 표시합니다. 자동 감지는 화면에서 제공하지 않습니다.
+
+현재 한·영 API: `https://yebeen23-emotion-wall-api.hf.space`.
+Vercel에 `VITE_API_URL`이 이미 설정되어 있다면 이 주소로 변경하고 재배포해야 합니다.
+로컬에서도 영어 분석을 확인하려면 아래처럼 실행합니다.
+
+```sh
+cd frontend
+VITE_API_URL=https://yebeen23-emotion-wall-api.hf.space npm run dev
+```
+
+로컬 USB LED를 사용할 때는 한·영 백엔드 변경이 포함된 로컬 서버를 실행하고
+`VITE_API_URL=http://127.0.0.1:8000`을 사용합니다. 클라우드 API는 노트북 USB를 제어하지 않습니다.
